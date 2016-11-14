@@ -9,6 +9,8 @@ var commands = new Map();
 commands.set('msg_send', sendMsg);
 commands.set('name_set', setName);
 
+var names = new Map();
+
 express.get('/', function(req, res){
 	res.sendFile(__dirname + '/websocket_client.html');
 });
@@ -26,6 +28,12 @@ wss.on('connection', function connection(ws) {
 			commands.get(cmd.code)(ws, cmd.args);
 		}
     });
+	
+	ws.on('close', function() {
+		if(ws.name != undefined && names.has(ws.name)){
+			names.delete(ws.name);
+		}
+	});
 });
 
 http.on('request', express);
@@ -61,6 +69,7 @@ function setName(ws, args){
 	}
 	
 	ws.name = args[0];
+	names.set(ws.name,ws);
 	send(ws, 'name_changed', ws.name);
 	console.log("Changed client name to: " + ws.name);
 }
