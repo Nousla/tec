@@ -8,6 +8,7 @@ var url = require('url');
 var commands = new Map();
 commands.set('msg_send', sendMsg);
 commands.set('name_set', setName);
+commands.set('chatroom_req', reqChatroom);
 
 var names = new Map();
 
@@ -61,6 +62,11 @@ function sendMsg(ws, args){
 		send(client, 'msg_received', msg);
 	});
 	console.log("Message received: " + msg);
+}
+
+function reqChatroom(id){
+	console.log('server: finding chatroom id');
+	
 }
 
 function setName(ws, args){
