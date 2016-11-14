@@ -15,11 +15,10 @@
 	</head>
 	<body>
 		<ul id="messages"></ul>
-		<form action="">
+		<form action="" id="sendForm">
 			<input id="sendInput"/>
-			<button id="sendBtn">Send</button>
+			<button>Send</button>
 		</form>
-		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 		<script>
 			ws = new WebSocket("ws://localhost:3000");
 
@@ -36,20 +35,14 @@
 				console.log("disconnected from server");
 			};
 			
-			/*document.getElementById("sendBtn").addEventListener("click", function(){
-				console.log("hej");
-				var sendInput = document.getElementById("sendInput");
-				ws.send(sendInput.textContent);
-				console.log(sendInput);
-				sendInput.textContent = "";
-				return false;
-			});*/
-			
-			$('form').submit(function(){
-				ws.send($('#sendInput').val());
-				$('#sendInput').val('');
-				return false;
-			});
+			window.onload = function () {
+				document.getElementById("sendForm").onsubmit = function(){
+					var sendInput = document.getElementById("sendInput");
+					ws.send(sendInput.value);
+					sendInput.value = "";
+					return false;
+				};
+			}
 		</script>
 	</body>
 </html>
