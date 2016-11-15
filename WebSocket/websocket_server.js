@@ -13,6 +13,8 @@ commands.set('msg_send', sendMsg);
 commands.set('name_set', setName);
 commands.set('chatroom_req', reqChatroom);
 commands.set('create', createRoom);
+commands.set('mute_client', muteClient);
+boolean muted;
 
 var names = new Map();
 
@@ -62,6 +64,7 @@ function parseMessage(msg) {
 }
 
 function sendMsg(ws, args) {
+	if(muted == false){
     msg = args.join(" ");
 	if(ws.role == 'admin'){
 		if(args[0] == '/mod'){
@@ -75,6 +78,7 @@ function sendMsg(ws, args) {
         send(client, 'msg_received', msg);
     });
     console.log("Message received: " + msg);
+	}
 }
 
 function reqChatroom(ws, args) {
@@ -91,6 +95,9 @@ function createRoom(ws, args) {
     console.log('room created ' + args[0]);
 }
 
+function muteClient(ws){
+	muted == true;
+}
 function setName(ws, args) {
     if (args.length != 1) {
         ws.send('name_error');

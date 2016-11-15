@@ -92,6 +92,9 @@
 				currentRoom = id;
 				
 			}
+			function muteClient(){
+				send(ws,'mute_Client', id);
+			}
 
             function nicknameOnBlur() {
                 var textInput = document.getElementById('textInput_nickname');
@@ -166,6 +169,9 @@
                             <h1>Create Chatroom</h1>
                             <div id="button_createChatroom" onclick="createChat()"><p>+</p></div>
                         </div>
+						<div id="muteClient">
+                            <h1>muteClient</h1>
+                            <div id="button_muteClient" onclick="muteClient()"><p>+</p></div>
                     </div>
                 </div>
             </div>
