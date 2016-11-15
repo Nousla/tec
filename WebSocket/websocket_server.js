@@ -4,11 +4,15 @@ var http = require('http').createServer();
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({ server: http });
 var url = require('url');
+var rooms = new Map();
+var user = ['admin']
+rooms.set('Lobby', user);
 
 var commands = new Map();
 commands.set('msg_send', sendMsg);
 commands.set('name_set', setName);
 commands.set('chatroom_req', reqChatroom);
+commands.set('create', createRoom);
 
 var names = new Map();
 
@@ -64,9 +68,13 @@ function sendMsg(ws, args){
 	console.log("Message received: " + msg);
 }
 
-function reqChatroom(id){
-	console.log('server: finding chatroom id');
+function reqChatroom(ws, args){
+	console.log('server: finding chatroom id ' + args);
 	
+}
+function createRoom(ws, args){
+	rooms.set(args, ['admin']);
+	console.log('room created ' + args);
 }
 
 function setName(ws, args){

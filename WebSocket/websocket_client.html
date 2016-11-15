@@ -131,6 +131,13 @@
 				document.getElementById("userSelect").style.display = "block";
 				document.getElementById("roomSelect").style.display = "none";
 			}
+
+			function createChat() {
+				var roomID = document.getElementById('textInput_createchat');
+				send(ws, 'create ' + roomID.value);
+				document.getElementById("roomKey").innerHTML = roomID.value;
+			}
+
 		</script>
 		<div id="wrap">
             <div class="content">
@@ -154,12 +161,16 @@
                         <p id="roomSelectOr">OR</p>
                         <div id="createChatroom">
                             <h1>Create Chatroom</h1>
-                            <div id="button_createChatroom" onclick="showUserSelect()"><p>+</p></div>
+                            <div id="button_createChatroom" onclick="createChat()"><p>Create</p></div>
+                            <input type="text" id="textInput_createchat" value="New Id">
                         </div>
+                        <p id="roomKey">New id</p>
                     </div>
                 </div>
             </div>
         </div>
+
+		</form>
 		<ul id="messages"></ul>
 		<form action="" id="sendForm">
 			<input id="sendInput"/>
