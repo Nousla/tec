@@ -6,10 +6,13 @@
     </head>
     <body>
         <script>
+			var userName;
             var commands = new Map();
             commands.set('msg_received', receivedMessage);
             commands.set('name_changed', changedName);
 			commands.set('writer_change', changedWriter);
+			commands.set('setRoom', setRoom);
+			
             var currentRoom = 'Lobby'
 			var writers = new Map();
 			
@@ -51,7 +54,7 @@
             window.onload = function () {
                 document.getElementById("sendForm").onsubmit = function () {
                     var sendInput = document.getElementById("sendInput");
-                    send(ws, 'msg_send', currentRoom + ' ' + sendInput.value);
+                    send(ws, 'msg_send', currentRoom + ' ' + userName + ' ' + sendInput.value);
                     sendInput.value = "";
                     return false;
                 };
@@ -146,6 +149,10 @@
                 send(ws, 'chatroom_req', id);
                 console.log('asking server for chatroom ID');
             }
+			function setRoom(id){
+				currentRoom = id;
+				
+			}
 
             function nicknameOnBlur() {
                 var textInput = document.getElementById('textInput_nickname');
@@ -156,6 +163,7 @@
 
             function createUser() {
                 var textInput = document.getElementById('textInput_nickname');
+				userName = textInput.value;
                 send(ws, 'name_set', textInput.value);
             }
 
@@ -191,7 +199,7 @@
                 // temp solution for random ID for room creation. 
                 // Should use a list instead, so a room with the same ID can't be created
                 var roomID = Math.floor(Math.random() * (1000 - 1 + 1)) + 1;
-                send(ws, 'create ' + roomID);
+                send(ws, 'create', roomID);
                 document.getElementById("roomKey").innerHTML = roomID;
             }
 			

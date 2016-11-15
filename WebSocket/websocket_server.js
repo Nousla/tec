@@ -5,7 +5,7 @@ var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({server: http});
 var url = require('url');
 var rooms = new Map();
-var user = ['admin']
+var user = []
 rooms.set('Lobby', user);
 
 var commands = new Map();
@@ -72,18 +72,30 @@ function parseMessage(msg) {
 }
 
 function sendMsg(ws, args) {
-    msg = args.join(" ");
-	
+    msg = args.join(" ");	
+	if(ws.role == 'admin'){
+		if(args[0] == '/mod'){
+			ws.setRole(names.get(args[1]),args[2])
+		}
+		if(args[0] == '/kick'){
+			kicked.push(names.get(args[1]));
+		}
+	}
 	sendAllRoom('msg_received', msg);
     console.log("Message received: " + msg);
 }
 
 function reqChatroom(ws, args) {
     console.log('server: finding chatroom id ' + args);
-
+	if(rooms.has(args)){
+		console.log('found room ' + args);
+		send(ws, 'setRoom', args);
+	}
+	else{console.log('no chatroom found with the specified ID')}
+	
 }
 function createRoom(ws, args) {
-    rooms.set(args, ['admin']);
+    rooms.set(args[0],[]);
     console.log('room created ' + args[0]);
 }
 
@@ -132,4 +144,25 @@ function sendAllRoom(code, args){
 	wss.clients.forEach(function each(client) {
 		send(client, code, args);
 	});
+}
+
+function setRole(name, role){
+	switch(role){
+	
+		case 'admin':
+			ws.role = 'admin';
+			break;
+	
+		case 'moderator':
+			ws.role = 'moderator';
+			break;
+	
+		case 'user':
+			ws.role = 'user';
+			break;
+	
+		case 'spectator':
+			ws.role = 'spectator';
+			break;
+	}
 }
