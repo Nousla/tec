@@ -22,6 +22,7 @@ express.get('/', function(req, res){
 
 wss.on('connection', function connection(ws) {
 	url.parse(ws.upgradeReq.url, true);
+    console.log("connected to client");
 
     ws.on('message', function(msg) {
 		var cmd = parseMessage(msg);
@@ -74,7 +75,7 @@ function reqChatroom(ws, args){
 }
 function createRoom(ws, args){
 	rooms.set(args, ['admin']);
-	console.log('room created ' + args);
+	console.log('room created ' + args[0]);
 }
 
 function setName(ws, args){

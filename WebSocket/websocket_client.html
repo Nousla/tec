@@ -17,6 +17,7 @@
 	<body>
 		<script>
 			var commands = new Map();
+            var currentRoom = 'Lobby'
 			commands.set('msg_received', receivedMessage);
 			commands.set('name_changed', changedName);
 		
@@ -58,7 +59,7 @@
 			window.onload = function () {
 				document.getElementById("sendForm").onsubmit = function(){
 					var sendInput = document.getElementById("sendInput");
-					send(ws, 'msg_send', sendInput.value);
+					send(ws, 'msg_send', currentRoom + ' ' + sendInput.value);
 					sendInput.value = "";
 					return false;
 				};
@@ -70,10 +71,14 @@
 			}
 			
 			function receivedMessage(args){
-				var messages = document.getElementById("messages");
-				var li = document.createElement("li");
-				li.textContent = args.join(" ");
-				messages.appendChild(li);
+                var mes = parseMessage(args);
+                if(mes.code == currentRoom){
+                    var messages = document.getElementById("messages");
+                    var li = document.createElement("li");
+                    li.textContent = mes.args.join(" ");
+                    messages.appendChild(li);
+                }
+
 			}
 			
 			function changedName(args){
