@@ -5,7 +5,7 @@ var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({server: http});
 var url = require('url');
 var rooms = new Map();
-var user = ['admin']
+var user = []
 rooms.set('Lobby', user);
 
 var commands = new Map();
@@ -71,10 +71,15 @@ function sendMsg(ws, args) {
 
 function reqChatroom(ws, args) {
     console.log('server: finding chatroom id ' + args);
-
+	if(rooms.has(args)){
+		console.log('found room ' + args);
+		send(ws, 'setRoom', args);
+	}
+	else{console.log('no chatroom found with the specified ID')}
+	
 }
 function createRoom(ws, args) {
-    rooms.set(args, ['admin']);
+    rooms.set(args[0],[]);
     console.log('room created ' + args[0]);
 }
 

@@ -10,6 +10,7 @@
             var currentRoom = 'Lobby'
             commands.set('msg_received', receivedMessage);
             commands.set('name_changed', changedName);
+			commands.set('setRoom', setRoom);
 
             ws = new WebSocket("ws://localhost:3000");
 
@@ -86,6 +87,10 @@
                 send(ws, 'chatroom_req', id);
                 console.log('asking server for chatroom ID');
             }
+			function setRoom(id){
+				currentRoom = id;
+				
+			}
 
             function nicknameOnBlur() {
                 var textInput = document.getElementById('textInput_nickname');
@@ -131,7 +136,7 @@
                 // temp solution for random ID for room creation. 
                 // Should use a list instead, so a room with the same ID can't be created
                 var roomID = Math.floor(Math.random() * (1000 - 1 + 1)) + 1;
-                send(ws, 'create ' + roomID);
+                send(ws, 'create', roomID);
                 document.getElementById("roomKey").innerHTML = roomID;
             }
 
