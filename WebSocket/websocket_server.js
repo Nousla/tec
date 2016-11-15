@@ -63,6 +63,14 @@ function parseMessage(msg) {
 
 function sendMsg(ws, args) {
     msg = args.join(" ");
+	if(ws.role == 'admin'){
+		if(args[0] == '/mod'){
+			ws.setRole(names.get(args[1]),args[2])
+		}
+		if(args[0] == '/kick'){
+			kicked.push(names.get(args[1]));
+		}
+	}
     wss.clients.forEach(function each(client) {
         send(client, 'msg_received', msg);
     });
@@ -96,4 +104,25 @@ function setName(ws, args) {
 
 function send(ws, code, args) {
     ws.send(code + " " + args);
+}
+
+function setRole(name, role){
+	switch(role){
+	
+		case 'admin':
+			ws.role = 'admin';
+			break;
+	
+		case 'moderator':
+			ws.role = 'moderator';
+			break;
+	
+		case 'user':
+			ws.role = 'user';
+			break;
+	
+		case 'spectator':
+			ws.role = 'spectator';
+			break;
+	}
 }
