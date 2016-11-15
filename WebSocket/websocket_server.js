@@ -13,10 +13,15 @@ commands.set('msg_send', sendMsg);
 commands.set('name_set', setName);
 commands.set('chatroom_req', reqChatroom);
 commands.set('create', createRoom);
+<<<<<<< HEAD
 commands.set('mute_client', muteClient);
 boolean muted;
+=======
+commands.set('ping_writer', pingWriter);
+>>>>>>> origin/master
 
 var names = new Map();
+var writers = new Map();
 
 express.get('/', function (req, res) {
     res.sendFile(__dirname + '/websocket_client.html');
@@ -24,11 +29,15 @@ express.get('/', function (req, res) {
 
 wss.on('connection', function connection(ws) {
     url.parse(ws.upgradeReq.url, true);
-    console.log("connected to client");
+    console.log("connected with client");
 
+	ws.on('open', function (){
+		writers.set(ws,'idle');
+	});
+	
     ws.on('message', function (msg) {
         var cmd = parseMessage(msg);
-        if (cmd == undefined) {
+        if (cmd == 'undefined') {
             return;
         }
 
@@ -38,9 +47,13 @@ wss.on('connection', function connection(ws) {
     });
 
     ws.on('close', function () {
-        if (ws.name != undefined && names.has(ws.name)) {
+        if (ws.name != 'undefined' && names.has(ws.name)) {
             names.delete(ws.name);
         }
+		
+		writers.delete(ws);
+		
+		// Notify other clients in chat room
     });
 });
 
@@ -64,8 +77,12 @@ function parseMessage(msg) {
 }
 
 function sendMsg(ws, args) {
+<<<<<<< HEAD
 	if(muted == false){
     msg = args.join(" ");
+=======
+    msg = args.join(" ");	
+>>>>>>> origin/master
 	if(ws.role == 'admin'){
 		if(args[0] == '/mod'){
 			ws.setRole(names.get(args[1]),args[2])
@@ -74,9 +91,7 @@ function sendMsg(ws, args) {
 			kicked.push(names.get(args[1]));
 		}
 	}
-    wss.clients.forEach(function each(client) {
-        send(client, 'msg_received', msg);
-    });
+	sendAllRoom('msg_received', msg);
     console.log("Message received: " + msg);
 	}
 }
@@ -99,18 +114,50 @@ function muteClient(ws){
 	muted == true;
 }
 function setName(ws, args) {
-    if (args.length != 1) {
-        ws.send('name_error');
+    if(args.length != 1) {
+        send(ws,'name_error','invalid');
+		console.log("Invalid name change error on: " + ws.name);
+		return;
     }
 
-    ws.name = args[0];
+    name = args[0];	
+	if(names.has(name)){
+		send(ws,'name_error','duplicate');
+		console.log("Duplicate name change error on: " + ws.name);
+		return;
+	}
+
+	ws.name = name;
     names.set(ws.name, ws);
     send(ws, 'name_changed', ws.name);
-    console.log("Changed client name to: " + ws.name);
+	
+    console.log("Changed a client's name to: " + ws.name);
+}
+
+function pingWriter(ws, args){
+	if(args.length != 1){
+		return;
+	}
+	
+	var state = args[0];
+	if(state === 'idle' || state === 'writing'){
+		var currentState = writers.get(ws);
+		if(currentState != state){
+			writers.set(ws, state);
+			sendAllRoom('writer_change', ws.name + " " + state);
+		}
+	}
 }
 
 function send(ws, code, args) {
     ws.send(code + " " + args);
+}
+
+function sendAllRoom(code, args){
+	// Get all clients in room and send
+	wss.clients.forEach(function each(client) {
+		send(client, code, args);
+	});
 }
 
 function setRole(name, role){
