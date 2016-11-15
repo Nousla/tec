@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+-->
+<html>
+    <head>
+        <title>Martin Fabricius - Home page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="stylesheet.css">
+        <link rel="icon" href="Chat_security.svg.png">
+    </head>
+    <body>
+        <div id="wrap">
+            <div class="content">
+                <div class="logo">
+					<p id="logo">JavaScript Chat</p>
+                </div>
+                <div class="selectionBox">
+                    <div id="userSelect" style="display: block;">
+                        <h1>Who are you?</h1>
+                        <div id="button_createUser" onclick="showRoomSelect()"><p>Enter</p></div>
+                        <input type="text" id="textInput_nickname" value="Enter your nickname" onfocus="nicknameOnFocus()" onblur="nicknameOnBlur()">
+                        <script>
+                            function nicknameOnFocus() {
+                                var textInput = document.getElementById('textInput_nickname').value;
+                                if(textInput == 'Enter your nickname') {
+                                     document.getElementById('textInput_nickname').value = '';
+                                }
+                            }
+
+                            function nicknameOnBlur() {
+                                var textInput = document.getElementById('textInput_nickname').value;
+                                if(textInput == '') {
+                                     document.getElementById('textInput_nickname').value = 'Enter your nickname';
+                                }
+                            }
+                            
+                            function showRoomSelect() {
+                                document.getElementById("userSelect").style.display = "none";
+                                document.getElementById("roomSelect").style.display = "block";
+                            }
+                        </script>
+                    </div>
+                    <!-- ... -->
+                    <div id="roomSelect" style="display: none;">
+                        <div id="enterChatroom">
+                            <h1>Enter Chatroom</h1>
+                            <div id="button_enterChatroom" onclick="chatroomOnBlur()"><p>Enter</p></div>
+                            <input type="text" id="textInput_chatroom" value="Enter Chatroom" onfocus="chatroomOnFocus()" onblur="chatroomOnBlur()">
+                            <script>
+                                function chatroomOnFocus() {
+                                    var textInput = document.getElementById('textInput_chatroom').value;
+                                    if(textInput == 'Enter Chatroom') {
+                                         document.getElementById('textInput_chatroom').value = '';
+                                    }
+                                }
+
+                                function chatroomOnBlur() {
+                                    var textInput = document.getElementById('textInput_chatroom').value;
+                                    if(textInput == '') {
+                                         document.getElementById('textInput_chatroom').value = 'Enter Chatroom';
+                                    }
+                                }
+                            </script>
+                        </div>
+                        <p id="roomSelectOr">OR</p>
+                        <div id="createChatroom">
+                            <h1>Create Chatroom</h1>
+                            <div id="button_createChatroom" onclick="createChatroom()"><p>+</p></div>
+                            <script>
+                                function createChatroom() {
+                                    document.location.href = "chat/index.html"
+                                }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

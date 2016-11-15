@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Socket.IO chat</title>
+        <link rel="stylesheet" type="text/css" href="chatroomstylesheet.css">
+    </head>
+    <body>
+        <div id="container">
+            <div class="logo">
+                <p id="logo">JavaScript + WebSocket + Node.js Chat</p>
+            </div>
+            <div class="content">
+                <div>
+                    <div id="featureBox">
+                        <div id="userListBox">
+                            userlist
+                        </div>
+                        <div id="adminPriviliges">
+                            <div class="buttonTest"><p>Make client a moderator</p></div>
+                            <div class="buttonTest"><p>Mute/unmute client</p></div>
+                            <div class="buttonTest"><p>Kick client</p></div>
+                            <div class="buttonTest"><p>Ban client</p></div>
+                        </div>
+                    </div>
+                    <div id="chatBox">
+                        <div id="messages"></div>
+                        <div id="sendMessage">
+                            <div id="button_sendMessage" onclick="sendMessage()"><p>Send</p></div>
+                            <textarea id="textArea_message" rows="1" oninput="autoResize()"></textarea>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <script>
+            function sendMessage() {
+                var textarea = document.getElementById("textArea_message");
+                var message = document.createElement("div");
+                var paragraph = document.createElement("p");
+                var text = document.createTextNode(textarea.value);
+
+                paragraph.appendChild(text);
+                message.className = "message";
+                message.appendChild(paragraph);
+                document.getElementById("messages").appendChild(message);
+
+                var chatBox = document.getElementById("messages");
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                var textarea = document.getElementById("textArea_message");
+                textarea.value = '';
+                textarea.rows = 1;
+            }
+
+            var rows = 1;
+            function autoResize() {
+                var textarea = document.getElementById("textArea_message");
+                if (textarea.clientHeight < textarea.scrollHeight) {
+                    textarea.rows++;
+                }
+            }
+        </script>
+    </body>
+</html>
