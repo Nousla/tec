@@ -1,0 +1,230 @@
+body {
+    background-color: #212125;
+}
+
+h1 {
+    font-family: verdana;
+    color: black;
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+
+p {
+    font-family: verdana;
+    font-size: 20px;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+
+div.content {
+    align-content: center;
+}
+
+div.logo {
+    width: 320px;
+    max-height: 200px;
+    margin: auto;
+}
+
+p#logo {
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+    margin-top: 150px;
+    margin-left: 10px;
+    font-size: 24px;
+    letter-spacing: .02em;
+}
+
+div.selectionBox {
+    background-color: black;
+    width: 300px;
+    height: 380px;
+    margin: auto; 
+    border-radius: 5px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: black;
+    display: -webkit-flex; /* Safari */
+    display: flex;
+    -webkit-box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+    -moz-box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+    box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+    
+}
+
+div#userSelect {
+    background-color: #ce432b;
+    -webkit-flex: 1;  /* Safari 6.1+ */
+    -ms-flex: 1;  /* IE 10 */
+    flex: 1;
+    text-align: right;
+}
+
+div.selectionBox h1{
+    color: white;
+    padding-top: 30px;
+    padding-bottom: 20px;
+    font-size: 30px;
+    letter-spacing: .02em;
+    font-weight: normal;
+    text-shadow: -3px 0 black, 0 3px black, 3px 0 black, 0 -3px black;
+}
+
+div.selectionBox input[type=text]{
+    display: block;
+    margin: auto;
+    width: 85%;
+    height: 35px;
+    font-family: sans-serif;
+    font-size: 18px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    border-radius: 2px;
+    margin-top: 10px;
+    padding-left: 10px;
+    -webkit-box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.1);
+    -moz-box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.1);
+    box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.1);
+    
+}
+div#button_createUser {
+    display: block;
+    position: absolute;
+    background-color: #404040;
+    border-radius: 0px 2px 2px 0px;
+    width: 50px;
+    height: 41px;
+    text-align: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    
+    cursor: pointer;
+    
+    -webkit-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    
+    margin-top: 9px;
+    margin-left: 235px;
+    
+}
+
+div#button_createUser p{
+    color: #999;
+    font-size: 11px;
+    font-weight: normal;
+    padding-top: 14px;
+}
+
+div#button_createUser:hover p{
+    color: white;
+}
+
+/*Chatroom creation*/
+
+div#roomSelect {
+    background-color: transparent;
+    -webkit-flex: 1;  /* Safari 6.1+ */
+    -ms-flex: 1;  /* IE 10 */
+    flex: 1;
+    text-align: center;
+}
+
+div#enterChatroom {
+    background-color: #ce432b;
+    height: 48%;
+}
+
+div#button_enterChatroom {
+    display: block;
+    position: absolute;
+    background-color: #404040;
+    border-radius: 0px 2px 2px 0px;
+    width: 50px;
+    height: 41px;
+    text-align: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    
+    cursor: pointer;
+    
+    -webkit-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    
+    margin-top: 9px;
+    margin-left: 235px;
+    
+}
+
+div#button_enterChatroom p{
+    color: #999;
+    font-size: 11px;
+    font-weight: normal;
+    padding-top: 14px;
+}
+
+div#button_enterChatroom:hover p{
+    color: white;
+}
+
+div#createChatroom {
+    margin-top: 5%;
+    background-color: #ce432b;
+    height: 48%;
+}
+
+p#roomSelectOr {
+    color: white;
+    font-size: 38px;
+    text-shadow: -3px 0 black, 0 3px black, 3px 0 black, 0 -3px black;
+    font-weight: bolder;
+    position: absolute;
+    margin-top: -16px;
+    margin-left: 120px;
+    align-self: center;
+}
+
+div#button_createChatroom {
+    display: block;
+    background-color: white;
+    border-radius: 100%;
+    width: 60px;
+    height: 60px;
+    text-align: center;    
+    margin: auto;
+    margin-top: 5px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    
+    cursor: pointer;
+    
+    -webkit-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.5);
+    -moz-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.5);
+    box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.5);
+}
+
+div#button_createChatroom:hover {
+    margin-top: 7px;
+}
+
+div#button_createChatroom p{
+    font-size: 44px;
+    font-weight: bolder;
+}
