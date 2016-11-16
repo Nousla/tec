@@ -1,0 +1,331 @@
+<!doctype html>
+<html>
+    <head>
+        <title>JavaScript + WebSocket + Node.js Chat</title>
+        <link rel="stylesheet" type="text/css" href="stylesheet.css">
+    </head>
+    <body>
+        <script>
+            var userName;
+            var roomID;
+
+            var commands = new Map();
+            commands.set('msg_received', receivedMessage);
+            commands.set('name_changed', changedName);
+            commands.set('writer_change', changedWriter);
+            commands.set('setRoom', setRoom);
+
+            var writers = new Map();
+
+            ///// Connect to server, and send/recieve messages
+            ws = new WebSocket("ws://localhost:3000");
+
+            ws.onopen = function () {
+                console.log("connected to server");
+            };
+
+            ws.onmessage = function (event) {
+                var cmd = parseMessage(event.data);
+                if (cmd == 'undefined') {
+                    return;
+                }
+
+                if (commands.has(cmd.code)) {
+                    commands.get(cmd.code)(cmd.args);
+                }
+            };
+
+            ws.onclose = function () {
+                console.log("disconnected from server");
+            };
+
+            function parseMessage(msg) {
+                console.log(msg);
+                console.log("Message received parse: " + msg);
+                if (msg.length == 0) {
+                    return;
+                }
+
+                var msgs = msg.split(" ");
+                var cmd = {
+                    code: msgs[0],
+                    args: msgs.slice(1, msgs.length)
+                }
+
+                return cmd;
+            }
+            /*
+             window.onload = function () {
+             document.getElementById("sendForm").onsubmit = function () {
+             var sendInput = document.getElementById("sendInput");
+             send(ws, 'msg_send', currentRoom + ' ' + userName + ' ' + sendInput.value);
+             sendInput.value = "";
+             return false;
+             };
+             }
+             */
+
+            function send(ws, code, args) {
+                ws.send(code + " " + args);
+                console.log("Sending" + " " + code + " " + args);
+            }
+
+            function receivedMessage(args) {
+                var chatMessage = args[1];
+                for (var i = 2; i < args.length; i++) {
+                    chatMessage += " " + args[i];
+                }
+                if (args[0] == roomID) {
+                    var message = document.createElement("div");
+                    var paragraph = document.createElement("p");
+                    var text = document.createTextNode(chatMessage);
+                    console.log("chatmessage: " + text);
+                    
+                    paragraph.appendChild(text);
+                    message.className = "message";
+                    message.appendChild(paragraph);
+                    document.getElementById("messages").appendChild(message);
+
+                    var chatBox = document.getElementById("messages");
+                    chatBox.scrollTop = chatBox.scrollHeight;
+
+                    var textarea = document.getElementById("textArea_message");
+                    textarea.value = '';
+                    textarea.rows = 1;
+                }
+
+            }
+
+
+
+            ///// User/room selection code
+            function createUser() {
+                var textInput = document.getElementById('textInput_nickname');
+                userName = textInput.value;
+                send(ws, 'name_set', textInput.value);
+            }
+
+            function setRoom(args) {
+                roomID = args;
+                showChatroom();
+            }
+
+            // Blur/focus user/room 
+            function nicknameOnFocus() {
+                var textInput = document.getElementById('textInput_nickname');
+                if (textInput.value == 'Enter your nickname') {
+                    textInput.value = '';
+                }
+            }
+            function nicknameOnBlur() {
+                var textInput = document.getElementById('textInput_nickname');
+                if (textInput.value == '') {
+                    textInput.value = 'Enter your nickname';
+                }
+            }
+
+            function chatroomOnFocus() {
+                var textInput = document.getElementById('textInput_chatroom');
+                if (textInput.value == 'Enter Chatroom') {
+                    textInput.value = '';
+                }
+            }
+            function chatroomOnBlur() {
+                var textInput = document.getElementById('textInput_chatroom');
+                if (textInput.value == '') {
+                    textInput.value = 'Enter Chatroom';
+                }
+            }
+
+            // Show chatroom selection
+            function changedName(msg) {
+                showRoomSelect();
+            }
+
+            //TODO: test if it works
+            function enterChatroom() {
+                var textInput = document.getElementById('textInput_chatroom');
+                joinChatRoom(textInput.value);
+            }
+
+            function joinChatRoom(id) {
+                send(ws, 'chatroom_req', id);
+                console.log('asking server for chatroom ID');
+            }
+
+            // Create chatroom
+            function createChatroom() {
+                send(ws, 'createChatroom', userName);
+            }
+
+
+            ///// Change between Div elements
+            function showDiv(id) {
+                switch (id) {
+                    case 'userSelect':
+                        document.getElementById("userSelect").style.display = "block";
+                        document.getElementById("roomSelect").style.display = "none";
+                        break;
+
+                    case 'roomSelect':
+                        document.getElementById("userSelect").style.display = "none";
+                        document.getElementById("roomSelect").style.display = "block";
+                        break;
+
+                    case 'chatroom':
+                        var selectionContainer = document.getElementsByClassName("selectionContainer");
+                        selectionContainer[0].style.display = "none";
+                        document.getElementById("chatroomContainer").style.display = "block";
+                        break;
+                }
+            }
+            function showUserSelect() {
+                showDiv('userSelect');
+            }
+            function showRoomSelect() {
+                showDiv('roomSelect');
+            }
+            function showChatroom() {
+                showDiv('chatroom');
+            }
+
+
+            ///// chatroom code
+            function changedWriter(args) {
+                var name = args[0];
+                var state = args[1];
+
+                if (name == 'undefined') {
+                    name = "John Cena";
+                }
+                /*
+                 if(state == 'idle' && writers.has(name)){
+                 writers.delete(name);
+                 }
+                 else{
+                 writers.set(name,state);
+                 }*/
+
+                writers.set(name, state);
+
+                updateWriters();
+
+                // Change user list
+            }
+
+            function updateWriters() {
+                var text = [];
+                if (writers.size > 5) {
+                    text.push("More than 5 people");
+                } else {
+                    writers.forEach(function (value, key, map) {
+                        if (value == 'writing') {
+                            text.push(key);
+                        }
+                    });
+                }
+
+                var writerText = document.getElementById('writerText');
+                writerText.innerHTML = text.join(', ');
+                console.log(writerText);
+            }
+
+            var writerTimeOutID;
+            var writerTimeOutDone = true;
+            var writerTimeOutTime = 1500;
+
+            function onTextAreaInput() {
+                if (!writerTimeOutDone) {
+                    clearTimeout(writerTimeOutID);
+                } else {
+                    send(ws, 'ping_writer', 'writing');
+                }
+
+                writerTimeOutID = setTimeout(function () {
+                    onWriterTimeOut();
+                }, writerTimeOutTime);
+
+                writerTimeOutDone = false;
+
+                autoResize();
+            }
+
+            function onWriterTimeOut() {
+                writerTimeOutDone = true;
+
+                send(ws, 'ping_writer', 'idle');
+            }
+
+            function sendMessage() {
+                var textarea = document.getElementById("textArea_message");
+                send(ws, 'msg_send', roomID + ' ' + textarea.value);
+                console.log(textarea.value);
+                textarea.value = "";
+                textarea.rows = 1;
+            }
+
+            function autoResize() {
+                var textarea = document.getElementById("textArea_message");
+                if (textarea.clientHeight < textarea.scrollHeight) {
+                    textarea.rows++;
+                }
+            }
+
+
+        </script>
+        <div id="wrap">
+            <div class="content">
+                <div class="logo">
+                    <p id="logo">JavaScript + WebSocket + Node.js Chat</p>
+                </div>
+
+                <div class="selectionContainer" style="display: block;">
+                    <!-- User selction -->
+                    <div id="userSelect" style="display: block;">
+                        <h1>Who are you?</h1>
+                        <div id="button_createUser" onclick="createUser()"><p>Enter</p></div>
+                        <input type="text" id="textInput_nickname" value="Enter your nickname" onfocus="nicknameOnFocus()" onblur="nicknameOnBlur()">
+                    </div>
+
+                    <!-- Chatroom selction -->
+                    <div id="roomSelect" style="display: none;">
+                        <div id="enterChatroom">
+                            <h1>Enter Chatroom</h1>
+                            <div id="button_enterChatroom" onclick="enterChatroom()"><p>Enter</p></div>
+                            <input type="text" id="textInput_chatroom" value="Enter Chatroom" onfocus="chatroomOnFocus()" onblur="chatroomOnBlur()">
+                        </div>
+                        <p id="roomSelectOr">OR</p>
+                        <div id="createChatroom">
+                            <h1>Create Chatroom</h1>
+                            <div id="button_createChatroom" onclick="createChatroom()"><p>+</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chatroom Div -->
+                <div id="chatroomContainer" style="display: none;">
+                    <div>
+                        <div id="featureBox">
+                            <div id="userListBox">
+                                userlist
+                            </div>
+                            <div id="adminPriviliges">
+                            </div>
+                        </div>
+                        <div id="chatBox">
+                            <div id="messages"></div>
+                            <div id="sendMessage">
+                                <div id="button_sendMessage" onclick="sendMessage()"><p>Send</p></div>
+                                <textarea id="textArea_message" rows="1" oninput="onTextAreaInput()"></textarea>
+                            </div>
+                            <div id="writerBox">
+                                <p>Current writers:</p>
+                                <p id="writerText"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
