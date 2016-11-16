@@ -17,7 +17,7 @@
 
             var writers = new Map();
 
-            ///// Connect to server, and send/recieve messages
+            ///// Connect to server, and send/receive messages
             ws = new WebSocket("ws://localhost:3000");
 
             ws.onopen = function () {
@@ -71,32 +71,72 @@
             }
 
             function receivedMessage(args) {
-                var chatMessage = args[1];
-                for (var i = 2; i < args.length; i++) {
-                    chatMessage += " " + args[i];
-                }
-                if (args[0] == roomID) {
-                    var message = document.createElement("div");
-                    var paragraph = document.createElement("p");
-                    var text = document.createTextNode(chatMessage);
-                    console.log("chatmessage: " + text);
-                    
-                    paragraph.appendChild(text);
-                    message.className = "message";
-                    message.appendChild(paragraph);
-                    document.getElementById("messages").appendChild(message);
+				var nickname = args[0];
+				var emoteCount = parseInt(args[1]);
+				var emoteEndIndex;
+				var emotes = new Map();
+				if(emoteCount > 0){
+					var emoteStartIndex = 2;
+					emoteEndIndex = 2 + (emoteCount * 2);
+					for(var i = 0; i < emoteCount; i++){
+						emotes.set(args[emoteStartIndex + 2 * i], args[emoteStartIndex + (2 * i) + 1]);
+					}
+				}
+				else{
+					emoteEndIndex = 3;
+				}
+				var msgFragments = args.slice(emoteEndIndex,args.length);
+				
+				var message = document.createElement("div");
+				message.className = "message";
+				
+				var nicknameParagraph = document.createElement("p");
+				var nicknameText = document.createTextNode(nickname);
+				nicknameParagraph.appendChild(nicknameText);
+				nicknameParagraph.id = "nickname";
+				message.appendChild(nicknameParagraph);
+				
+				var msgFragment = [];
+				var emoteFound = false;
+				for(var i = 0; i < msgFragments.length; i++){
+					if(emotes.has(msgFragments[i])){
+						if(msgFragment.length > 0){
+							var msg = msgFragment.join(" ");
+							var msgParagraph = document.createElement("p");
+							var msgText = document.createTextNode(msg);
+							msgParagraph.appendChild(msgText);
+							message.appendChild(msgParagraph);
+							
+							msgFragment = [];
+						}
+						
+						var emoteImg = document.createElement("img");
+						emoteImg.src = emotes.get(msgFragments[i]);
+						emoteImg.className = "emote";
+						message.appendChild(emoteImg);
+					}
+					else{
+						msgFragment.push(msgFragments[i]);
+					
+						if(i == msgFragments.length - 1 && msgFragment.length > 0){
+							var msg = msgFragment.join(" ");
+							var msgParagraph = document.createElement("p");
+							var msgText = document.createTextNode(msg);
+							msgParagraph.appendChild(msgText);
+							message.appendChild(msgParagraph);
+						}
+					}
+				}
+				
+				document.getElementById("messages").appendChild(message);
 
-                    var chatBox = document.getElementById("messages");
-                    chatBox.scrollTop = chatBox.scrollHeight;
+				var chatBox = document.getElementById("messages");
+				chatBox.scrollTop = chatBox.scrollHeight;
 
-                    var textarea = document.getElementById("textArea_message");
-                    textarea.value = '';
-                    textarea.rows = 1;
-                }
-
+				var textarea = document.getElementById("textArea_message");
+				textarea.value = '';
+				textarea.rows = 1;
             }
-
-
 
             ///// User/room selection code
             function createUser() {
@@ -196,7 +236,7 @@
                 var state = args[1];
 
                 if (name == 'undefined') {
-                    name = "John Cena";
+                    return;
                 }
                 /*
                  if(state == 'idle' && writers.has(name)){
@@ -216,7 +256,7 @@
             function updateWriters() {
                 var text = [];
                 if (writers.size > 5) {
-                    text.push("More than 5 people");
+                    text.push(writer.size + " people are writing...");
                 } else {
                     writers.forEach(function (value, key, map) {
                         if (value == 'writing') {
@@ -258,7 +298,7 @@
 
             function sendMessage() {
                 var textarea = document.getElementById("textArea_message");
-                send(ws, 'msg_send', roomID + ' ' + textarea.value);
+                send(ws, 'msg_send', textarea.value);
                 console.log(textarea.value);
                 textarea.value = "";
                 textarea.rows = 1;

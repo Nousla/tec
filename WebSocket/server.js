@@ -1,5 +1,6 @@
 var port = 3000;
-var express = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').createServer();
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({server: http});
@@ -11,34 +12,34 @@ var commands = new Map();
 commands.set('msg_send', sendMsg);
 commands.set('name_set', setName);
 commands.set('chatroom_req', reqChatroom);
-//commands.set('create', createRoom);
 commands.set('mute_client', muteClient);
 commands.set('ping_writer', pingWriter);
 commands.set('createChatroom', createChatroom);
 
 var names = new Map();
 var writers = new Map();
+var emotes = new Map();
+emotes.set(':)', 'resources/img/emoticon/Smile.png');
+emotes.set('Smile', 'resources/img/emoticon/Smile.png');
+emotes.set(':(', 'resources/img/emoticon/Sad.png');
+emotes.set('Sad', 'resources/img/emoticon/Sad.png');
 
-//userList.set(roomName, userID, nickname, role);
-var userList = new Map();
+app.use('/resources', express.static('resources'));
 
-
-
-express.get('/', function (req, res) {
+app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
 wss.on('connection', function connection(ws) {
     url.parse(ws.upgradeReq.url, true);
     console.log("connected with client");
-
+	
     ws.on('open', function () {
         writers.set(ws, 'idle');
     });
 
     ws.on('message', function (msg) {
         var cmd = parseMessage(msg);
-        //console.log("message received in console: " + msg);
         if (cmd === 'undefined') {
             return;
         }
@@ -59,7 +60,7 @@ wss.on('connection', function connection(ws) {
     });
 });
 
-http.on('request', express);
+http.on('request', app);
 http.listen(3000, function () {
     console.log('Listening on ' + port);
 });
@@ -108,13 +109,51 @@ function sendMsg(ws, args) {
             }
         }
     }
-    
-    var chatMessage = args[0];
-    for (var i = 1; i < args.length; i++) {
-        chatMessage += " " + args[i];
-    }
-    sendAllRoom('msg_received', chatMessage);
-    console.log("Sending message to: " + chatMessage);
+	
+	// Setup data to send
+	var scannedMessage = scanMessage(args);
+	
+	var data = [];
+	// Nickname
+	data.push(ws.name);
+	// Emote count
+	data.push(scannedMessage.emotes.length / 2);
+	// Emotes
+	data.push(scannedMessage.emotes.join(" "));
+	// Message
+    data.push(scannedMessage.msg.join(" "));
+	
+	var sendMsg = data.join(" ");
+	
+    sendAllRoom(ws.roomID, 'msg_received', sendMsg);
+    console.log("Sending message: | " + sendMsg + " | by " + ws.name + " to room " + ws.roomID);
+}
+
+function scanMessage(msg_args){
+	var fullMsg = msg_args.join(" ");
+	fullMsg = fullMsg.replace(/(\r\n|\n|\r)/,"");
+	msg_args = fullMsg.split(" ");
+
+	console.log(fullMsg.split(" "));
+	// TODO: censorship
+	
+	var emoteSet = new Set();
+	var foundEmotes = [];
+	for(var i = 0; i < msg_args.length; i++){
+		var msg = msg_args[i];
+		if(emotes.has(msg) && !emoteSet.has(msg)){
+			emoteSet.add(msg);
+			foundEmotes.push(msg);
+			foundEmotes.push(emotes.get(msg));
+		}
+	}
+	
+	var result = {
+		msg: msg_args,
+		emotes: foundEmotes
+	};
+	
+	return result;
 }
 
 function reqChatroom(ws, args) {
@@ -122,6 +161,10 @@ function reqChatroom(ws, args) {
     var roomID = args[0];
     if (activeChatrooms.has(roomID)) {
         console.log('found room ' + roomID);
+		// Disconnect from existing chat room if already set
+		var clients = activeChatrooms.get(roomID);
+		clients.set(ws,true);
+		ws.roomID = roomID;
         send(ws, 'setRoom', roomID);
     } else {
         console.log('no chatroom found with the specified ID');
@@ -163,7 +206,7 @@ function pingWriter(ws, args) {
         var currentState = writers.get(ws);
         if (currentState !== state) {
             writers.set(ws, state);
-            sendAllRoom('writer_change', ws.name + " " + state);
+            sendAllRoom(ws.roomID, 'writer_change', ws.name + " " + state);
         }
     }
 }
@@ -172,7 +215,16 @@ function send(ws, code, args) {
     ws.send(code + " " + args);
 }
 
-function sendAllRoom(code, args) {
+function sendAllRoom(roomID, code, args) {
+	if(activeChatrooms.has(roomID)){
+		var clients = activeChatrooms.get(roomID);
+		clients.forEach(function each(value, client) {
+			send(client, code, args);
+		});
+	}
+}
+
+function sendAll(code, args) {
     // Get all clients in room and send
     wss.clients.forEach(function each(client) {
         send(client, code, args);
@@ -267,11 +319,16 @@ function createChatroom(ws, args) {
 
     } while (activeChatrooms.has(roomID));
 
-    activeChatrooms.set(roomID);
+	var clients = new Map();
+	clients.set(ws,true);
+    activeChatrooms.set(roomID,clients);
+	
     console.log('chatroom created: ' + roomID);
 
     // TODO: Check if the user is actually set as Admin
-    userList.set(roomID, 'ClientID', roomCreator, 'admin');
+	ws.role = 'admin';
+	ws.roomID = roomID;
+    // userList.set(roomID, 'ClientID', roomCreator, 'admin');
 
     send(ws, 'setRoom', roomID);
 }
