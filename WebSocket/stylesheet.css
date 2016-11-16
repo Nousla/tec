@@ -377,6 +377,7 @@ div.message img.emote{
 	margin-right: 5px;
 	margin-top: -5px;
     margin-bottom: -10px;
+	float: left;
 }
 
 /*inside div#chatRoomContainer*/

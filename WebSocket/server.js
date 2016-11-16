@@ -19,8 +19,10 @@ commands.set('createChatroom', createChatroom);
 var names = new Map();
 var writers = new Map();
 var emotes = new Map();
-emotes.set('FeelsBad', 'resources/img/emoticon/FeelsBad.png');
-emotes.set('Kappa', 'resources/img/emoticon/Kappa.png');
+emotes.set(':)', 'resources/img/emoticon/Smile.png');
+emotes.set('Smile', 'resources/img/emoticon/Smile.png');
+emotes.set(':(', 'resources/img/emoticon/Sad.png');
+emotes.set('Sad', 'resources/img/emoticon/Sad.png');
 
 app.use('/resources', express.static('resources'));
 
@@ -38,7 +40,6 @@ wss.on('connection', function connection(ws) {
 
     ws.on('message', function (msg) {
         var cmd = parseMessage(msg);
-        //console.log("message received in console: " + msg);
         if (cmd === 'undefined') {
             return;
         }
@@ -129,7 +130,13 @@ function sendMsg(ws, args) {
 }
 
 function scanMessage(msg_args){
+	var fullMsg = msg_args.join(" ");
+	fullMsg = fullMsg.replace(/(\r\n|\n|\r)/,"");
+	msg_args = fullMsg.split(" ");
+
+	console.log(fullMsg.split(" "));
 	// TODO: censorship
+	
 	var emoteSet = new Set();
 	var foundEmotes = [];
 	for(var i = 0; i < msg_args.length; i++){
@@ -199,7 +206,7 @@ function pingWriter(ws, args) {
         var currentState = writers.get(ws);
         if (currentState !== state) {
             writers.set(ws, state);
-            sendAllRoom('writer_change', ws.name + " " + state);
+            sendAllRoom(ws.roomID, 'writer_change', ws.name + " " + state);
         }
     }
 }
