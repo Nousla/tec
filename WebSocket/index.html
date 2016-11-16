@@ -73,21 +73,61 @@
             function receivedMessage(args) {
 				var nickname = args[0];
 				var emoteCount = parseInt(args[1]);
-				var emoteEndIndex = 2 + (emoteCount * 2);
-				var emotes = [];
+				var emoteEndIndex;
+				var emotes = new Map();
 				if(emoteCount > 0){
-					emotes = args.slice(2,emoteEndIndex);
+					var emoteStartIndex = 2;
+					emoteEndIndex = 2 + (emoteCount * 2);
+					for(var i = 0; i < emoteCount; i++){
+						emotes.set(args[emoteStartIndex + 2 * i], args[emoteStartIndex + (2 * i) + 1]);
+					}
 				}
-				var msg = args.slice(emoteEndIndex,args.length).join(" ");
+				else{
+					emoteEndIndex = 3;
+				}
+				var msgFragments = args.slice(emoteEndIndex,args.length);
 				
-                var message = document.createElement("div");
-				var paragraph = document.createElement("p");
-				var text = document.createTextNode(msg);
-				console.log("msg: " + text);
-				
-				paragraph.appendChild(text);
+				var message = document.createElement("div");
 				message.className = "message";
-				message.appendChild(paragraph);
+				
+				var nicknameParagraph = document.createElement("p");
+				var nicknameText = document.createTextNode(nickname);
+				nicknameParagraph.appendChild(nicknameText);
+				nicknameParagraph.id = "nickname";
+				message.appendChild(nicknameParagraph);
+				
+				var msgFragment = [];
+				var emoteFound = false;
+				for(var i = 0; i < msgFragments.length; i++){
+					if(emotes.has(msgFragments[i])){
+						if(msgFragment.length > 0){
+							var msg = msgFragment.join(" ");
+							var msgParagraph = document.createElement("p");
+							var msgText = document.createTextNode(msg);
+							msgParagraph.appendChild(msgText);
+							message.appendChild(msgParagraph);
+							
+							msgFragment = [];
+						}
+						
+						var emoteImg = document.createElement("img");
+						emoteImg.src = emotes.get(msgFragments[i]);
+						emoteImg.className = "emote";
+						message.appendChild(emoteImg);
+					}
+					else{
+						msgFragment.push(msgFragments[i]);
+					
+						if(i == msgFragments.length - 1 && msgFragment.length > 0){
+							var msg = msgFragment.join(" ");
+							var msgParagraph = document.createElement("p");
+							var msgText = document.createTextNode(msg);
+							msgParagraph.appendChild(msgText);
+							message.appendChild(msgParagraph);
+						}
+					}
+				}
+				
 				document.getElementById("messages").appendChild(message);
 
 				var chatBox = document.getElementById("messages");

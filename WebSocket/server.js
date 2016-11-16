@@ -1,5 +1,6 @@
 var port = 3000;
-var express = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').createServer();
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({server: http});
@@ -18,16 +19,19 @@ commands.set('createChatroom', createChatroom);
 var names = new Map();
 var writers = new Map();
 var emotes = new Map();
-emotes.set('feelsBad', '/img/emoticon/feelsBad.png');
+emotes.set('FeelsBad', 'resources/img/emoticon/FeelsBad.png');
+emotes.set('Kappa', 'resources/img/emoticon/Kappa.png');
 
-express.get('/', function (req, res) {
+app.use('/resources', express.static('resources'));
+
+app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
 wss.on('connection', function connection(ws) {
     url.parse(ws.upgradeReq.url, true);
     console.log("connected with client");
-
+	
     ws.on('open', function () {
         writers.set(ws, 'idle');
     });
@@ -55,7 +59,7 @@ wss.on('connection', function connection(ws) {
     });
 });
 
-http.on('request', express);
+http.on('request', app);
 http.listen(3000, function () {
     console.log('Listening on ' + port);
 });
@@ -153,6 +157,7 @@ function reqChatroom(ws, args) {
 		// Disconnect from existing chat room if already set
 		var clients = activeChatrooms.get(roomID);
 		clients.set(ws,true);
+		ws.roomID = roomID;
         send(ws, 'setRoom', roomID);
     } else {
         console.log('no chatroom found with the specified ID');
@@ -207,7 +212,6 @@ function sendAllRoom(roomID, code, args) {
 	if(activeChatrooms.has(roomID)){
 		var clients = activeChatrooms.get(roomID);
 		clients.forEach(function each(value, client) {
-			//console.log(client);
 			send(client, code, args);
 		});
 	}

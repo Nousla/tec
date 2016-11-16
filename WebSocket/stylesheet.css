@@ -360,8 +360,24 @@ div.message p {
     border: 0px;
     word-wrap: break-word;
     white-space: pre;
+	float: left;
+	margin-right: 5px;
 }
 
+div.message p#nickname{
+	float: left;
+	font-weight: bold;
+	color: darkgrey;
+	margin-right: 5px;
+}
+
+div.message img.emote{
+	width: 32px;
+	height: 32px;
+	margin-right: 5px;
+	margin-top: -5px;
+    margin-bottom: -10px;
+}
 
 /*inside div#chatRoomContainer*/
 div#chatroomContainer {
