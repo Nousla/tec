@@ -1,0 +1,466 @@
+html, body { 
+    margin: 0px; 
+    padding: 0px;
+}
+
+body {
+    background-color: #212125;
+}
+
+div {
+    display: block;
+    margin: auto;
+}
+
+h1 {
+    font-family: verdana;
+    color: black;
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+
+p {
+    font-family: verdana;
+    font-size: 20px;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+
+div {
+    display: block;
+    margin: auto;
+}
+
+div.content {
+    align-content: center;
+}
+
+div#logoSelection {
+    align-content: center;
+    width: 300px;
+}
+
+div#logoSelection div.content{
+    width: 600px;
+}
+
+div#logoChatroom {
+    align-content: center;
+    width: 1180px;
+}
+
+div#logoChatroom div.content{
+    width: 600px;
+}
+
+p#logo {
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 24px;
+    letter-spacing: .02em;
+    margin-top: 50px;
+    margin-left: 10px;
+}
+
+div.selectionContainer {
+    align-content: center;
+    width: 300px;
+}
+
+div#selectionBox {
+    background-color: black;
+    width: 300px;
+    height: 380px;
+    margin: auto; 
+    border-radius: 5px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: black;
+    display: -webkit-flex; /* Safari */
+    display: flex;
+    -webkit-box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+    -moz-box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+    box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+
+}
+
+div#selectionBox h1{
+    color: white;
+    padding-top: 30px;
+    padding-bottom: 20px;
+    font-size: 30px;
+    letter-spacing: .02em;
+    font-weight: normal;
+    text-shadow: -3px 0 black, 0 3px black, 3px 0 black, 0 -3px black;
+}
+
+div#selectionBox input[type=text]{
+    display: block;
+    margin: auto;
+    width: 65%;
+    height: 35px;
+    font-family: sans-serif;
+    font-size: 18px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    border-radius: 2px;
+    margin-top: 10px;
+    padding-left: 10px;
+    padding-right: 50px;
+    -webkit-box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.1);
+    -moz-box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.1);
+    box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.1);
+
+}
+
+div#userSelect {
+    background-color: #ce432b;
+    height: 100%;
+    -webkit-flex: 1;  /* Safari 6.1+ */
+    -ms-flex: 1;  /* IE 10 */
+    flex: 1;
+    text-align: right;
+}
+
+div#button_createUser {
+    display: block;
+    position: absolute;
+    background-color: #404040;
+    border-radius: 0px 2px 2px 0px;
+    width: 50px;
+    height: 41px;
+    text-align: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    cursor: pointer;
+
+    -webkit-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+
+    margin-top: 9px;
+    margin-left: 235px;
+
+}
+
+div#button_createUser p{
+    color: #999;
+    font-size: 11px;
+    font-weight: normal;
+    padding-top: 14px;
+}
+
+div#button_createUser:hover p{
+    color: white;
+}
+
+/*Chatroom creation*/
+
+div#roomSelect {
+    background-color: transparent;
+    height: 100%;
+    -webkit-flex: 1;  /* Safari 6.1+ */
+    -ms-flex: 1;  /* IE 10 */
+    flex: 1;
+    text-align: center;
+}
+
+div#enterChatroom {
+    background-color: #ce432b;
+    height: 48%;
+}
+
+div#button_enterChatroom {
+    display: block;
+    position: absolute;
+    background-color: #404040;
+    border-radius: 0px 2px 2px 0px;
+    width: 50px;
+    height: 41px;
+    text-align: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    cursor: pointer;
+
+    -webkit-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+
+    margin-top: 9px;
+    margin-left: 235px;
+
+}
+
+div#button_enterChatroom p{
+    color: #999;
+    font-size: 11px;
+    font-weight: normal;
+    padding-top: 14px;
+}
+
+div#button_enterChatroom:hover p{
+    color: white;
+}
+
+div#createChatroom {
+    margin-top: 5%;
+    background-color: #ce432b;
+    height: 48%;
+}
+
+p#roomSelectOr {
+    color: white;
+    font-size: 38px;
+    text-shadow: -3px 0 black, 0 3px black, 3px 0 black, 0 -3px black;
+    font-weight: bolder;
+    position: absolute;
+    margin-top: -16px;
+    margin-left: 120px;
+    align-self: center;
+}
+
+div#button_createChatroom {
+    display: block;
+    background-color: white;
+    border-radius: 100%;
+    width: 60px;
+    height: 60px;
+    text-align: center;    
+    margin: auto;
+    margin-top: 5px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    cursor: pointer;
+
+    -webkit-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.5);
+    -moz-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.5);
+    box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.5);
+}
+
+div#button_createChatroom:hover {
+    margin-top: 7px;
+}
+
+div#button_createChatroom p{
+    font-size: 44px;
+    font-weight: bolder;
+}
+
+div#messages {
+    background-color: #f2f2f2;
+    border: 1px solid dimgray;
+    width: 580px;
+    height: 580px;
+    margin-top: 10px;
+    overflow: hidden;
+    -ms-overflow-y: auto; /* IE8 */
+    overflow-y: auto;
+}
+
+div#sendMessage textarea{
+    display: block;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    font-family: sans-serif;
+    font-size: 18px;
+    width: 470px;
+    height: auto;
+    max-height: 75px;
+    margin: auto;
+    float: left;
+
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    padding: 5px 10px;
+
+    resize: none;
+
+    box-shadow: none;
+    -webkit-box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.1);
+    -moz-box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.1);
+    box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.1);
+}
+
+div#button_sendMessage {
+    display: block;
+    background-color: #404040;
+    border-radius: 2px;
+    width: 80px;
+    height: 35px;
+    text-align: center;
+    float: right;
+
+    margin-top: 9px;
+    margin-right: 10px;
+    margin-bottom: 9px;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    cursor: pointer;
+
+    -webkit-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+}
+
+div#button_sendMessage p{
+    color: #999;
+    font-size: 11px;
+    font-weight: normal;
+    padding-top: 10px;
+}
+
+div#button_sendMessage:hover p{
+    color: white;
+}
+
+/*Writers*/
+
+div#writerBox {
+    border: 1px;
+    border-color: black;
+    margin-top: 10px;
+    margin-left: 10px;
+    float: left;
+}
+
+div#writerBox p {
+    font-family: verdana;
+    font-size: 10px;
+    color: white;
+}
+
+/*Messages*/
+
+div.message {
+    border-bottom: 1px dashed dimgray;
+    width: 97%;
+    min-height: 20px;
+    padding: 10px;
+}
+
+div.message:nth-child(odd){
+    background-color: #e6e6e6;
+}
+
+div.message p {
+    font-family: verdana;
+    font-size: 14px;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+    word-wrap: break-word;
+    white-space: pre;
+    float: left;
+    margin-right: 5px;
+}
+
+div.message p#nickname{
+    float: left;
+    font-weight: bold;
+    color: dimgray;
+    margin-right: 5px;
+}
+
+div.message img.emote{
+    width: 32px;
+    height: 32px;
+    margin-right: 5px;
+    margin-top: -5px;
+    margin-bottom: -10px;
+    float: left;
+}
+
+/*inside div#chatRoomContainer*/
+div#chatroomContainer {
+    align-content: center;
+    width: 1180px;
+}
+
+/*chatBox*/
+div#chatBox {
+    background-color: #ce432b;
+    border: 10px solid black;
+    border-radius: 5px;
+    width: 600px;
+    height: 700px;
+
+    -webkit-box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+    -moz-box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+    box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+}
+
+
+/*FeatureBox*/
+div#featureBox {
+    position: absolute;
+    background-color: #ce432b;
+    border: 10px solid black;
+    border-radius: 5px;
+    width: 230px;
+    height: 580px;
+    margin-left: 20px;
+
+    -webkit-box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+    -moz-box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+    box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
+}
+
+div#userListBox {
+    background-color: #f2f2f2;
+    border: 1px solid dimgray;
+    width: 210px;
+    height: 340px;
+    margin-top: 10px;
+    overflow: hidden;
+    -ms-overflow-y: auto; /* IE8 */
+    overflow-y: auto;
+}
+
+div#userListBox div{
+    border-bottom: 1px dashed dimgray;
+    width: 100%;
+    min-height: 20px;
+    padding: 0px;
+}
+
+div#userListBox p{
+    font-family: verdana;
+    font-size: 16px;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+
+    font-weight: bold;
+    color: dimgray;
+    padding: 8px 0px 10px 15px;
+}
+
+div#userListBox div:nth-child(odd){
+    background-color: #e6e6e6;
+}
