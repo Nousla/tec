@@ -31,7 +31,7 @@
 
             ws.onmessage = function (event) {
                 var cmd = parseMessage(event.data);
-                if (cmd == 'undefined') {
+                if (cmd == undefined) {
                     return;
                 }
 
@@ -306,7 +306,7 @@
                 var name = args[0];
                 var state = args[1];
 
-                if (name == 'undefined') {
+                if (name == undefined) {
                     return;
                 }
                 /*

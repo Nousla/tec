@@ -40,7 +40,7 @@ wss.on('connection', function connection(ws) {
 
     ws.on('message', function (msg) {
         var cmd = parseMessage(msg);
-        if (cmd === 'undefined') {
+        if (cmd === undefined) {
             return;
         }
 
@@ -52,7 +52,7 @@ wss.on('connection', function connection(ws) {
     ws.on('close', function () {
 		leaveChatroom(ws);
 	
-        if (ws.name !== 'undefined' && names.has(ws.name)) {
+        if (ws.name !== undefined && names.has(ws.name)) {
             names.delete(ws.name);
         }
 
@@ -86,33 +86,36 @@ function sendMsg(ws, args) {
     var sendMessage = true;
     if(ws.role === 'admin' || ws.role === 'moderator'){
 		var otherWS = names.get(args[1]);
-        if (args[0] === '/mod') {
-            sendMessage = false;
-            setRole(names.get(args[1]), args[2]);
-            console.log(args[1] + ' ' + otherWS.role);
-            sendAllRoom(ws.roomID,'notification_received', ws.name + ' has changed the role of ' + args[1] + ' to ' + otherWS.role);
-        }
-        else if (args[0] === '/kick') {
-            sendMessage = false;
-            var kickedUsers = kicked.get(ws.roomID);
-            kickedUsers.push(otherWS);
-            send(names.get(args[1]), 'setRoom', 'Lobby');
-			leaveChatroom(otherWS);
-            sendAllRoom(ws.roomID,'notification_received', ws.name + ' has kicked ' + args[1]); 
-        }
-        else if (args[0] === '/unkick') {
-            sendMessage = false;
-            var kickedUsers = kicked.get(ws.roomID);
-            if(kickedUsers.includes(otherWS)){
-                for(var i = kickedUsers.length -1; i >= 0; i--){
-                    if(kickedUsers[i] === otherWS){
-                        kickedUsers.splice(i, 1);
-						sendAllRoom(ws.roomID,'notification_received', ws.name + ' has unkicked ' + args[1]); 
-						break;
-                    }
-                }
-            }
-        }
+		if(otherWS !== undefined && otherWS !== null){
+			if (args[0] === '/mod') {
+				sendMessage = false;
+				setRole(names.get(args[1]), args[2]);
+				console.log(args[1] + ' ' + otherWS.role);
+				sendAllRoom(ws.roomID,'notification_received', ws.name + ' has changed the role of ' + args[1] + ' to ' + otherWS.role);
+			}
+			else if (args[0] === '/kick') {
+				sendMessage = false;
+				var kickedUsers = kicked.get(ws.roomID);
+				kickedUsers.push(otherWS);
+				send(names.get(args[1]), 'setRoom', 'Lobby');
+				leaveChatroom(otherWS);
+				sendAllRoom(ws.roomID,'notification_received', ws.name + ' has kicked ' + args[1]); 
+			}
+			else if (args[0] === '/unkick') {
+				sendMessage = false;
+				var kickedUsers = kicked.get(ws.roomID);
+				if(kickedUsers.includes(otherWS)){
+					for(var i = kickedUsers.length -1; i >= 0; i--){
+						if(kickedUsers[i] === otherWS){
+							kickedUsers.splice(i, 1);
+							sendAllRoom(ws.roomID,'notification_received', ws.name + ' has unkicked ' + args[1]); 
+							break;
+						}
+					}
+				}
+			}
+		}
+        
     }
     if(sendMessage === false){
         return;
@@ -143,7 +146,6 @@ function scanMessage(msg_args) {
     msg_args = fullMsg.split(" ");
 
     console.log(fullMsg.split(" "));
-    // TODO: censorship
 
     var emoteSet = new Set();
     var foundEmotes = [];
@@ -184,7 +186,7 @@ function reqChatroom(ws, args) {
 }
 
 function leaveChatroom(ws) {
-	if(ws.roomID === 'undefined' || ws.roomID === null 
+	if(ws.roomID === undefined || ws.roomID === null 
 		|| !activeChatrooms.has(ws.roomID)){
 		return;
 	}
