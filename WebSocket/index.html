@@ -17,6 +17,7 @@
             commands.set('setRoom', setRoom);
             commands.set('updateUserList', updateUserList);
             commands.set('removeFromUserList', removeFromUserList);
+            commands.set('kickUser', kickFromRoom);
 
             var writers = new Map();
 
@@ -179,6 +180,9 @@
                     textInput.value = 'Enter Chatroom';
                 }
             }
+            function kickFromRoom(){
+                showDiv('roomSelect');
+            }
 
             // Show chatroom selection
             function changedName(msg) {
@@ -213,6 +217,8 @@
                     case 'roomSelect':
                         document.getElementById("userSelect").style.display = "none";
                         document.getElementById("roomSelect").style.display = "block";
+                        document.getElementById("selectionContainer").style.display = "block";
+                        document.getElementById("chatroomContainer").style.display = "none";
                         break;
 
                     case 'chatroom':

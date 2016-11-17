@@ -5,7 +5,7 @@ var http = require('http').createServer();
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({server: http});
 var url = require('url');
-var kicked = [];
+var kicked = new Map();
 var activeChatrooms = new Map();
 
 var commands = new Map();
@@ -66,7 +66,7 @@ http.listen(3000, function () {
 });
 
 function parseMessage(msg) {
-    if (msg.length == 0) {
+    if (msg.length === 0) {
         return;
     }
 
@@ -74,40 +74,48 @@ function parseMessage(msg) {
     var cmd = {
         code: msgs[0],
         args: msgs.slice(1, msgs.length)
-    }
+    };
 
     return cmd;
 }
 
 function sendMsg(ws, args) {
-    if (ws.muted === false) {
-        if (ws.role === 'admin') {
-            if (args[0] === '/mod') {
-                ws.setRole(names.get(args[1]), args[2]);
+    if (ws.muted === true) {
+        return;
+    }
+    var sendMessage = true;
+    if(ws.role === 'admin' || ws.role === 'moderator'){
+        if (args[0] === '/mod') {
+            sendMessage = false;
+            setRole(names.get(args[1]), args[2]);
+            console.log(args[1] + ' ' + names.get(args[1]).role);
+            sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has changed the role of ' + args[1] + ' to ' + names.get(args[1]).role);
             }
-            if (args[0] === '/kick') {
-                kicked.push(names.get(args[1]));
+        if (args[0] === '/kick') {
+            sendMessage = false;
+            var kickedUsers = kicked.get(ws.roomID);
+            kickedUsers.push(names.get(args[1]));
+            send(names.get(args[1]), 'kickUser', '');
+            var clients = activeChatrooms.get(ws.roomID);
+            clients.delete(names.get(args[1]));
+            names.get(args[1]).roomID = null;
+            sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has kicked ' + args[1]); 
             }
-            if (args[0] === '/mute') {
-                ws.muted = true;
-            }
-            if (args[0] === '/unmute') {
-
-            }
-        } else if (ws.role === 'moderator') {
-            if ((ws.role !== 'admin') || (ws.role !== 'moderator')) {
-                if (args[0] === '/kick') {
-                    kicked.push(names.get(args[1]));
-
+        if (args[0] === '/unkick') {
+            sendMessage = false;
+            var kickedUsers = kicked.get(ws.roomID);
+            if(kickedUsers.includes(names.get(args[1]))){
+                for(var i = kickedUsers.length -1; i >= 0; i--){
+                    if(kickedUsers[i] === names.get(args[1])){
+                        kickedUsers.splice(i, 1);
+                    }
                 }
-                if (args[0] === '/mute') {
-                    ws.muted = true;
-                }
-                if (args[0] === '/unmute') {
-
-                }
+                sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has unkicked ' + args[1]); 
             }
         }
+    }
+    if(sendMessage === false){
+        return;
     }
 
     // Setup data to send
@@ -159,12 +167,13 @@ function scanMessage(msg_args) {
 function reqChatroom(ws, args) {
     console.log('server: finding chatroom id ' + args);
     var roomID = args[0];
-    if (activeChatrooms.has(roomID)) {
+    if (activeChatrooms.has(roomID) && !kicked.get(roomID).includes(ws)) {
         console.log('found room ' + roomID);
         // Disconnect from existing chat room if already set
         var clients = activeChatrooms.get(roomID);
         clients.set(ws, true);
         ws.roomID = roomID;
+        ws.muted = false;
         send(ws, 'setRoom', roomID);
 
         updateUserList(roomID);
@@ -344,12 +353,14 @@ function createChatroom(ws, args) {
     var clients = new Map();
     clients.set(ws, true);
     activeChatrooms.set(roomID, clients);
+    kicked.set(roomID, []);
 
     console.log('chatroom created: ' + roomID);
 
     // TODO: Check if the user is actually set as Admin
     ws.role = 'admin';
     ws.roomID = roomID;
+    ws.muted = false;
     // userList.set(roomID, 'ClientID', roomCreator, 'admin');
 
     send(ws, 'setRoom', roomID);
