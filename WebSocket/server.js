@@ -95,7 +95,7 @@ function sendMsg(ws, args) {
             sendMessage = false;
             var kickedUsers = kicked.get(ws.roomID);
             kickedUsers.push(names.get(args[1]));
-            send(names.get(args[1]), 'kickUser', '');
+            send(names.get(args[1]), 'setRoom', 'Lobby');
             var clients = activeChatrooms.get(ws.roomID);
             clients.delete(names.get(args[1]));
             names.get(args[1]).roomID = null;
