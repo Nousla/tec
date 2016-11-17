@@ -90,7 +90,6 @@ function sendMsg(ws, args) {
 			if (args[0] === '/mod') {
 				sendMessage = false;
 				setRole(names.get(args[1]), args[2]);
-				console.log(args[1] + ' ' + otherWS.role);
 				sendAllRoom(ws.roomID,'notification_received', ws.name + ' has changed the role of ' + args[1] + ' to ' + otherWS.role);
 			}
 			else if (args[0] === '/kick') {
@@ -115,9 +114,8 @@ function sendMsg(ws, args) {
 				}
 			}
 		}
-        
     }
-    if(sendMessage === false){
+    if (sendMessage === false) {
         return;
     }
 
@@ -213,8 +211,8 @@ function updateUserList(roomID) {
     clients.forEach(function search(value, client) {
         clientList.push(client.name);
     });
-    
-	var allClients = clientList.join(" ");
+
+    var allClients = clientList.join(" ");
     clients.forEach(function each(value, client) {
         send(client, 'updateUserList', allClients);
     });

@@ -13,7 +13,7 @@
 
             var commands = new Map();
             commands.set('msg_received', receivedMessage);
-			commands.set('notification_received', receivedNotification);
+            commands.set('notification_received', receivedNotification);
             commands.set('name_changed', changedName);
             commands.set('writer_change', changedWriter);
             commands.set('setRoom', setRoom);
@@ -140,23 +140,23 @@
                 textarea.value = '';
                 textarea.rows = 1;
             }
-			
-			function receivedNotification(args){
-				var notification = document.createElement("div");
+
+            function receivedNotification(args) {
+                var notification = document.createElement("div");
                 notification.className = "notification";
-				var notificationParagraph = document.createElement("p");
-				var notificationText = document.createTextNode(args.join(" "));
-				notificationParagraph.appendChild(notificationText);
-				notification.appendChild(notificationParagraph);
-				document.getElementById("messages").appendChild(notification);
-				
-				var chatBox = document.getElementById("messages");
+                var notificationParagraph = document.createElement("p");
+                var notificationText = document.createTextNode(args.join(" "));
+                notificationParagraph.appendChild(notificationText);
+                notification.appendChild(notificationParagraph);
+                document.getElementById("messages").appendChild(notification);
+
+                var chatBox = document.getElementById("messages");
                 chatBox.scrollTop = chatBox.scrollHeight;
-				
-				var textarea = document.getElementById("textArea_message");
+
+                var textarea = document.getElementById("textArea_message");
                 textarea.value = '';
                 textarea.rows = 1;
-			}
+            }
 
             ///// User/room selection code
             function createUser() {
@@ -177,6 +177,10 @@
                     showRoomSelect();
                     document.getElementById('logoChatroom').setAttribute("id", "logoSelection");
                     document.getElementById('logo').innerHTML = defaultRoomID;
+                    var messages = document.getElementById('messages');
+                    while (messages.hasChildNodes()) {
+                        messages.removeChild(messages.lastChild);
+                    }
                 }
             }
 
@@ -267,7 +271,7 @@
             function updateUserList(args) {
                 var clientList = args;
                 console.log("updateUserList:")
-				
+
                 clientList.forEach(function each(name, index) {
                     if (userList.indexOf(name) === -1) {
                         userList.push(name);
@@ -281,16 +285,16 @@
                         document.getElementById("userListBox").appendChild(div);
                     }
                 });
-				
-				userList.forEach(function each(name, index) {
-					if (clientList.indexOf(name) === -1) {
-                        userList.splice(index,1);
-						
-						var userListBox = document.getElementById("userListBox");
-						var userDiv = document.getElementById("username" + name);
-						userListBox.removeChild(userDiv);
+
+                userList.forEach(function each(name, index) {
+                    if (clientList.indexOf(name) === -1) {
+                        userList.splice(index, 1);
+
+                        var userListBox = document.getElementById("userListBox");
+                        var userDiv = document.getElementById("username" + name);
+                        userListBox.removeChild(userDiv);
                     }
-				});
+                });
             }
 
             function removeFromUserList(args) {
