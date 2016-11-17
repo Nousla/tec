@@ -90,16 +90,15 @@ function sendMsg(ws, args) {
             sendMessage = false;
             setRole(names.get(args[1]), args[2]);
             console.log(args[1] + ' ' + otherWS.role);
-            sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has changed the role of ' + args[1] + ' to ' + otherWS.role);
-            }
+            sendAllRoom(ws.roomID,'notification_received', ws.name + ' has changed the role of ' + args[1] + ' to ' + otherWS.role);
+        }
         else if (args[0] === '/kick') {
             sendMessage = false;
             var kickedUsers = kicked.get(ws.roomID);
             kickedUsers.push(otherWS);
             send(names.get(args[1]), 'setRoom', 'Lobby');
 			leaveChatroom(otherWS);
-            sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has kicked ' + args[1]); 
-			
+            sendAllRoom(ws.roomID,'notification_received', ws.name + ' has kicked ' + args[1]); 
         }
         else if (args[0] === '/unkick') {
             sendMessage = false;
@@ -108,7 +107,7 @@ function sendMsg(ws, args) {
                 for(var i = kickedUsers.length -1; i >= 0; i--){
                     if(kickedUsers[i] === otherWS){
                         kickedUsers.splice(i, 1);
-						sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has unkicked ' + args[1]); 
+						sendAllRoom(ws.roomID,'notification_received', ws.name + ' has unkicked ' + args[1]); 
 						break;
                     }
                 }

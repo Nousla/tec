@@ -13,6 +13,7 @@
 
             var commands = new Map();
             commands.set('msg_received', receivedMessage);
+			commands.set('notification_received', receivedNotification);
             commands.set('name_changed', changedName);
             commands.set('writer_change', changedWriter);
             commands.set('setRoom', setRoom);
@@ -139,6 +140,23 @@
                 textarea.value = '';
                 textarea.rows = 1;
             }
+			
+			function receivedNotification(args){
+				var notification = document.createElement("div");
+                notification.className = "notification";
+				var notificationParagraph = document.createElement("p");
+				var notificationText = document.createTextNode(args.join(" "));
+				notificationParagraph.appendChild(notificationText);
+				notification.appendChild(notificationParagraph);
+				document.getElementById("messages").appendChild(notification);
+				
+				var chatBox = document.getElementById("messages");
+                chatBox.scrollTop = chatBox.scrollHeight;
+				
+				var textarea = document.getElementById("textArea_message");
+                textarea.value = '';
+                textarea.rows = 1;
+			}
 
             ///// User/room selection code
             function createUser() {

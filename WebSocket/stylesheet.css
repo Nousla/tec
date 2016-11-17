@@ -396,6 +396,30 @@ div.message img.emote{
     float: left;
 }
 
+div.notification {
+    border-bottom: 1px dashed dimgray;
+    width: 97%;
+    min-height: 20px;
+    padding: 10px;
+}
+
+div.notification:nth-child(odd){
+    background-color: #e6e6e6;
+}
+
+div.notification p {
+    font-family: verdana;
+    font-size: 14px;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+    word-wrap: break-word;
+    white-space: pre;
+    float: left;
+    margin-right: 5px;
+	font-weight: bold;
+}
+
 /*inside div#chatRoomContainer*/
 div#chatroomContainer {
     align-content: center;
