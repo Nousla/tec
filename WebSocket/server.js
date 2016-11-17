@@ -50,13 +50,13 @@ wss.on('connection', function connection(ws) {
     });
 
     ws.on('close', function () {
+		leaveChatroom(ws);
+	
         if (ws.name !== 'undefined' && names.has(ws.name)) {
             names.delete(ws.name);
         }
 
         writers.delete(ws);
-
-        // Notify other clients in chat room
     });
 });
 
@@ -85,32 +85,33 @@ function sendMsg(ws, args) {
     }
     var sendMessage = true;
     if(ws.role === 'admin' || ws.role === 'moderator'){
+		var otherWS = names.get(args[1]);
         if (args[0] === '/mod') {
             sendMessage = false;
             setRole(names.get(args[1]), args[2]);
-            console.log(args[1] + ' ' + names.get(args[1]).role);
-            sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has changed the role of ' + args[1] + ' to ' + names.get(args[1]).role);
+            console.log(args[1] + ' ' + otherWS.role);
+            sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has changed the role of ' + args[1] + ' to ' + otherWS.role);
             }
-        if (args[0] === '/kick') {
+        else if (args[0] === '/kick') {
             sendMessage = false;
             var kickedUsers = kicked.get(ws.roomID);
-            kickedUsers.push(names.get(args[1]));
+            kickedUsers.push(otherWS);
             send(names.get(args[1]), 'kickUser', '');
-            var clients = activeChatrooms.get(ws.roomID);
-            clients.delete(names.get(args[1]));
-            names.get(args[1]).roomID = null;
+			leaveChatroom(otherWS);
             sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has kicked ' + args[1]); 
-            }
-        if (args[0] === '/unkick') {
+			
+        }
+        else if (args[0] === '/unkick') {
             sendMessage = false;
             var kickedUsers = kicked.get(ws.roomID);
-            if(kickedUsers.includes(names.get(args[1]))){
+            if(kickedUsers.includes(otherWS)){
                 for(var i = kickedUsers.length -1; i >= 0; i--){
-                    if(kickedUsers[i] === names.get(args[1])){
+                    if(kickedUsers[i] === otherWS){
                         kickedUsers.splice(i, 1);
+						sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has unkicked ' + args[1]); 
+						break;
                     }
                 }
-                sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has unkicked ' + args[1]); 
             }
         }
     }
@@ -181,7 +182,27 @@ function reqChatroom(ws, args) {
     } else {
         console.log('no chatroom found with the specified ID');
     }
+}
 
+function leaveChatroom(ws) {
+	if(ws.roomID === 'undefined' || ws.roomID === null){
+		return;
+	}
+	
+	var roomID = ws.roomID;
+	var clients = activeChatrooms.get(roomID);
+	if(clients.has(ws)){
+		clients.delete(ws);
+	}
+
+	ws.roomID = null;
+	
+	if(clients.size == 0){
+		activeChatrooms.delete(roomID);
+	}
+	else{
+		updateUserList(roomID);
+	}
 }
 
 function updateUserList(roomID) {
@@ -191,8 +212,9 @@ function updateUserList(roomID) {
         clientList.push(client.name);
     });
     
+	var allClients = clientList.join(" ");
     clients.forEach(function each(value, client) {
-        send(client, 'updateUserList', clientList);
+        send(client, 'updateUserList', allClients);
     });
 }
 

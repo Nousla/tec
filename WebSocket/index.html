@@ -240,12 +240,9 @@
 
             ///// chatroom code
             function updateUserList(args) {
-                var x = "";
-                x = args[0];
-                var clientList = x.split(",");
+                var clientList = args;
                 console.log("updateUserList:")
-                console.log(x);
-                console.log(userList);
+				
                 clientList.forEach(function each(name, index) {
                     if (userList.indexOf(name) === -1) {
                         userList.push(name);
@@ -255,10 +252,20 @@
 
                         paragraph.appendChild(text);
                         div.appendChild(paragraph);
-                        div.setAttribute("id", "username" + text);
+                        div.setAttribute("id", "username" + name);
                         document.getElementById("userListBox").appendChild(div);
                     }
                 });
+				
+				userList.forEach(function each(name, index) {
+					if (clientList.indexOf(name) === -1) {
+                        userList.splice(index,1);
+						
+						var userListBox = document.getElementById("userListBox");
+						var userDiv = document.getElementById("username" + name);
+						userListBox.removeChild(userDiv);
+                    }
+				});
             }
 
             function removeFromUserList(args) {
