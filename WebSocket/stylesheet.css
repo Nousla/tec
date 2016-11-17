@@ -38,23 +38,40 @@ div.content {
     align-content: center;
 }
 
-div.logo {
+div#logoSelection {
+    align-content: center;
+    width: 300px;
+}
+
+div#logoSelection div.content{
     width: 600px;
-    max-height: 200px;
-    margin: auto;
+}
+
+div#logoChatroom {
+    align-content: center;
+    width: 1180px;
+}
+
+div#logoChatroom div.content{
+    width: 600px;
 }
 
 p#logo {
     color: white;
     font-weight: bold;
     margin-bottom: 10px;
-    margin-top: 50px;
-    margin-left: 10px;
     font-size: 24px;
     letter-spacing: .02em;
+    margin-top: 50px;
+    margin-left: 10px;
 }
 
 div.selectionContainer {
+    align-content: center;
+    width: 300px;
+}
+
+div#selectionBox {
     background-color: black;
     width: 300px;
     height: 380px;
@@ -71,7 +88,7 @@ div.selectionContainer {
 
 }
 
-div.selectionContainer h1{
+div#selectionBox h1{
     color: white;
     padding-top: 30px;
     padding-bottom: 20px;
@@ -81,11 +98,7 @@ div.selectionContainer h1{
     text-shadow: -3px 0 black, 0 3px black, 3px 0 black, 0 -3px black;
 }
 
-div.selectionContainer div{
-    height: 100%;
-}
-
-div.selectionContainer input[type=text]{
+div#selectionBox input[type=text]{
     display: block;
     margin: auto;
     width: 65%;
@@ -106,6 +119,7 @@ div.selectionContainer input[type=text]{
 
 div#userSelect {
     background-color: #ce432b;
+    height: 100%;
     -webkit-flex: 1;  /* Safari 6.1+ */
     -ms-flex: 1;  /* IE 10 */
     flex: 1;
@@ -153,6 +167,7 @@ div#button_createUser:hover p{
 
 div#roomSelect {
     background-color: transparent;
+    height: 100%;
     -webkit-flex: 1;  /* Safari 6.1+ */
     -ms-flex: 1;  /* IE 10 */
     flex: 1;
@@ -329,6 +344,7 @@ div#button_sendMessage:hover p{
 div#writerBox {
     border: 1px;
     border-color: black;
+    margin-top: 10px;
     margin-left: 10px;
     float: left;
 }
@@ -360,24 +376,24 @@ div.message p {
     border: 0px;
     word-wrap: break-word;
     white-space: pre;
-	float: left;
-	margin-right: 5px;
+    float: left;
+    margin-right: 5px;
 }
 
 div.message p#nickname{
-	float: left;
-	font-weight: bold;
-	color: darkgrey;
-	margin-right: 5px;
+    float: left;
+    font-weight: bold;
+    color: dimgray;
+    margin-right: 5px;
 }
 
 div.message img.emote{
-	width: 32px;
-	height: 32px;
-	margin-right: 5px;
-	margin-top: -5px;
+    width: 32px;
+    height: 32px;
+    margin-right: 5px;
+    margin-top: -5px;
     margin-bottom: -10px;
-	float: left;
+    float: left;
 }
 
 /*inside div#chatRoomContainer*/
@@ -406,8 +422,9 @@ div#featureBox {
     background-color: #ce432b;
     border: 10px solid black;
     border-radius: 5px;
-    width: 250px;
+    width: 230px;
     height: 580px;
+    margin-left: 20px;
 
     -webkit-box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
     -moz-box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.45);
@@ -417,42 +434,33 @@ div#featureBox {
 div#userListBox {
     background-color: #f2f2f2;
     border: 1px solid dimgray;
-    width: 230px;
-    height: 260px;
-
+    width: 210px;
+    height: 340px;
     margin-top: 10px;
+    overflow: hidden;
+    -ms-overflow-y: auto; /* IE8 */
+    overflow-y: auto;
 }
 
-div.buttonTest {
-    background-color: #404040;
-    border: 1px solid #404040;
-    border-radius: 3px;
-    width: 230px;
-    height: 40px;
-    text-align: center;
-    margin-top: 10px;
-    border-radius: 3px;
-
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-
-    cursor: pointer;
-
-    -webkit-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
-    -moz-box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
-    box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+div#userListBox div{
+    border-bottom: 1px dashed dimgray;
+    width: 100%;
+    min-height: 20px;
+    padding: 0px;
 }
 
-div.buttonTest p{
-    color: white;
+div#userListBox p{
+    font-family: verdana;
     font-size: 16px;
-    margin-top: 10px;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+
+    font-weight: bold;
+    color: dimgray;
+    padding: 8px 0px 10px 15px;
 }
 
-div.buttonTest:hover p{
-    color: white;
+div#userListBox div:nth-child(odd){
+    background-color: #e6e6e6;
 }
