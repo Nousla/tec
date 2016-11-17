@@ -96,7 +96,7 @@ function sendMsg(ws, args) {
             sendMessage = false;
             var kickedUsers = kicked.get(ws.roomID);
             kickedUsers.push(otherWS);
-            send(names.get(args[1]), 'kickUser', '');
+            send(names.get(args[1]), 'setRoom', 'Lobby');
 			leaveChatroom(otherWS);
             sendAllRoom(ws.roomID,'msg_received', ws.name + ' ' + 0 + ' ' + 'Has kicked ' + args[1]); 
 			

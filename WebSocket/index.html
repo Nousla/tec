@@ -9,6 +9,7 @@
             var userName;
             var roomID;
             var userList = [];
+            var defaultRoomID = "Javascript chat";
 
             var commands = new Map();
             commands.set('msg_received', receivedMessage);
@@ -17,7 +18,6 @@
             commands.set('setRoom', setRoom);
             commands.set('updateUserList', updateUserList);
             commands.set('removeFromUserList', removeFromUserList);
-            commands.set('kickUser', kickFromRoom);
 
             var writers = new Map();
 
@@ -149,9 +149,17 @@
 
             function setRoom(args) {
                 roomID = args;
-                showChatroom();
-                document.getElementById('logoSelection').setAttribute("id", "logoChatroom");
-                document.getElementById('logo').innerHTML = "Chatroom: " + args;
+                console.log(roomID);
+                if (roomID[0] !== 'Lobby') {
+                    showChatroom();
+                    document.getElementById('logoSelection').setAttribute("id", "logoChatroom");
+                    document.getElementById('logo').innerHTML = "Chatroom: " + args;
+                } else {
+                    console.log("changed room to lobby");
+                    showRoomSelect();
+                    document.getElementById('logoChatroom').setAttribute("id", "logoSelection");
+                    document.getElementById('logo').innerHTML = defaultRoomID;
+                }
             }
 
             // Blur/focus user/room 
@@ -179,9 +187,6 @@
                 if (textInput.value == '') {
                     textInput.value = 'Enter Chatroom';
                 }
-            }
-            function kickFromRoom(){
-                showDiv('roomSelect');
             }
 
             // Show chatroom selection
@@ -212,6 +217,8 @@
                     case 'userSelect':
                         document.getElementById("userSelect").style.display = "block";
                         document.getElementById("roomSelect").style.display = "none";
+                        document.getElementById("selectionContainer").style.display = "block";
+                        document.getElementById("chatroomContainer").style.display = "none";
                         break;
 
                     case 'roomSelect':
