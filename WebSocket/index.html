@@ -8,12 +8,15 @@
         <script>
             var userName;
             var roomID;
+            var userList = [];
 
             var commands = new Map();
             commands.set('msg_received', receivedMessage);
             commands.set('name_changed', changedName);
             commands.set('writer_change', changedWriter);
             commands.set('setRoom', setRoom);
+            commands.set('updateUserList', updateUserList);
+            commands.set('removeFromUserList', removeFromUserList);
 
             var writers = new Map();
 
@@ -71,71 +74,69 @@
             }
 
             function receivedMessage(args) {
-				var nickname = args[0];
-				var emoteCount = parseInt(args[1]);
-				var emoteEndIndex;
-				var emotes = new Map();
-				if(emoteCount > 0){
-					var emoteStartIndex = 2;
-					emoteEndIndex = 2 + (emoteCount * 2);
-					for(var i = 0; i < emoteCount; i++){
-						emotes.set(args[emoteStartIndex + 2 * i], args[emoteStartIndex + (2 * i) + 1]);
-					}
-				}
-				else{
-					emoteEndIndex = 3;
-				}
-				var msgFragments = args.slice(emoteEndIndex,args.length);
-				
-				var message = document.createElement("div");
-				message.className = "message";
-				
-				var nicknameParagraph = document.createElement("p");
-				var nicknameText = document.createTextNode(nickname);
-				nicknameParagraph.appendChild(nicknameText);
-				nicknameParagraph.id = "nickname";
-				message.appendChild(nicknameParagraph);
-				
-				var msgFragment = [];
-				var emoteFound = false;
-				for(var i = 0; i < msgFragments.length; i++){
-					if(emotes.has(msgFragments[i])){
-						if(msgFragment.length > 0){
-							var msg = msgFragment.join(" ");
-							var msgParagraph = document.createElement("p");
-							var msgText = document.createTextNode(msg);
-							msgParagraph.appendChild(msgText);
-							message.appendChild(msgParagraph);
-							
-							msgFragment = [];
-						}
-						
-						var emoteImg = document.createElement("img");
-						emoteImg.src = emotes.get(msgFragments[i]);
-						emoteImg.className = "emote";
-						message.appendChild(emoteImg);
-					}
-					else{
-						msgFragment.push(msgFragments[i]);
-					
-						if(i == msgFragments.length - 1 && msgFragment.length > 0){
-							var msg = msgFragment.join(" ");
-							var msgParagraph = document.createElement("p");
-							var msgText = document.createTextNode(msg);
-							msgParagraph.appendChild(msgText);
-							message.appendChild(msgParagraph);
-						}
-					}
-				}
-				
-				document.getElementById("messages").appendChild(message);
+                var nickname = args[0];
+                var emoteCount = parseInt(args[1]);
+                var emoteEndIndex;
+                var emotes = new Map();
+                if (emoteCount > 0) {
+                    var emoteStartIndex = 2;
+                    emoteEndIndex = 2 + (emoteCount * 2);
+                    for (var i = 0; i < emoteCount; i++) {
+                        emotes.set(args[emoteStartIndex + 2 * i], args[emoteStartIndex + (2 * i) + 1]);
+                    }
+                } else {
+                    emoteEndIndex = 3;
+                }
+                var msgFragments = args.slice(emoteEndIndex, args.length);
 
-				var chatBox = document.getElementById("messages");
-				chatBox.scrollTop = chatBox.scrollHeight;
+                var message = document.createElement("div");
+                message.className = "message";
 
-				var textarea = document.getElementById("textArea_message");
-				textarea.value = '';
-				textarea.rows = 1;
+                var nicknameParagraph = document.createElement("p");
+                var nicknameText = document.createTextNode(nickname);
+                nicknameParagraph.appendChild(nicknameText);
+                nicknameParagraph.id = "nickname";
+                message.appendChild(nicknameParagraph);
+
+                var msgFragment = [];
+                var emoteFound = false;
+                for (var i = 0; i < msgFragments.length; i++) {
+                    if (emotes.has(msgFragments[i])) {
+                        if (msgFragment.length > 0) {
+                            var msg = msgFragment.join(" ");
+                            var msgParagraph = document.createElement("p");
+                            var msgText = document.createTextNode(msg);
+                            msgParagraph.appendChild(msgText);
+                            message.appendChild(msgParagraph);
+
+                            msgFragment = [];
+                        }
+
+                        var emoteImg = document.createElement("img");
+                        emoteImg.src = emotes.get(msgFragments[i]);
+                        emoteImg.className = "emote";
+                        message.appendChild(emoteImg);
+                    } else {
+                        msgFragment.push(msgFragments[i]);
+
+                        if (i == msgFragments.length - 1 && msgFragment.length > 0) {
+                            var msg = msgFragment.join(" ");
+                            var msgParagraph = document.createElement("p");
+                            var msgText = document.createTextNode(msg);
+                            msgParagraph.appendChild(msgText);
+                            message.appendChild(msgParagraph);
+                        }
+                    }
+                }
+
+                document.getElementById("messages").appendChild(message);
+
+                var chatBox = document.getElementById("messages");
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                var textarea = document.getElementById("textArea_message");
+                textarea.value = '';
+                textarea.rows = 1;
             }
 
             ///// User/room selection code
@@ -148,6 +149,8 @@
             function setRoom(args) {
                 roomID = args;
                 showChatroom();
+                document.getElementById('logoSelection').setAttribute("id", "logoChatroom");
+                document.getElementById('logo').innerHTML = "Chatroom: " + args;
             }
 
             // Blur/focus user/room 
@@ -213,8 +216,7 @@
                         break;
 
                     case 'chatroom':
-                        var selectionContainer = document.getElementsByClassName("selectionContainer");
-                        selectionContainer[0].style.display = "none";
+                        document.getElementById("selectionContainer").style.display = "none";
                         document.getElementById("chatroomContainer").style.display = "block";
                         break;
                 }
@@ -231,6 +233,37 @@
 
 
             ///// chatroom code
+            function updateUserList(args) {
+                var x = "";
+                x = args[0];
+                var clientList = x.split(",");
+                console.log("updateUserList:")
+                console.log(x);
+                console.log(userList);
+                clientList.forEach(function each(name, index) {
+                    if (userList.indexOf(name) === -1) {
+                        userList.push(name);
+                        var div = document.createElement("div");
+                        var paragraph = document.createElement("p");
+                        var text = document.createTextNode(name);
+
+                        paragraph.appendChild(text);
+                        div.appendChild(paragraph);
+                        div.setAttribute("id", "username" + text);
+                        document.getElementById("userListBox").appendChild(div);
+                    }
+                });
+            }
+
+            function removeFromUserList(args) {
+                //userList.splice(args);
+                var index = userList.indexOf(args);
+                userList.splice(index, 1);
+
+                var userListBox = document.getElementById("userListBox");
+                userListBox.removeChild("username" + args);
+            }
+
             function changedWriter(args) {
                 var name = args[0];
                 var state = args[1];
@@ -249,8 +282,6 @@
                 writers.set(name, state);
 
                 updateWriters();
-
-                // Change user list
             }
 
             function updateWriters() {
@@ -314,12 +345,14 @@
 
         </script>
         <div id="wrap">
-            <div class="content">
-                <div class="logo">
-                    <p id="logo">JavaScript + WebSocket + Node.js Chat</p>
+            <div id="logoSelection">
+                <div class="content">
+                    <p id="logo">JavaScript Chat</p>
                 </div>
+            </div>
 
-                <div class="selectionContainer" style="display: block;">
+            <div id="selectionContainer" style="display: block;">
+                <div id="selectionBox">
                     <!-- User selction -->
                     <div id="userSelect" style="display: block;">
                         <h1>Who are you?</h1>
@@ -341,27 +374,24 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Chatroom Div -->
-                <div id="chatroomContainer" style="display: none;">
-                    <div>
-                        <div id="featureBox">
-                            <div id="userListBox">
-                                userlist
-                            </div>
-                            <div id="adminPriviliges">
-                            </div>
+            <!-- Chatroom Div -->
+            <div id="chatroomContainer" style="display: none;">
+                <div>
+                    <div id="featureBox">
+                        <div id="userListBox">
                         </div>
-                        <div id="chatBox">
-                            <div id="messages"></div>
-                            <div id="sendMessage">
-                                <div id="button_sendMessage" onclick="sendMessage()"><p>Send</p></div>
-                                <textarea id="textArea_message" rows="1" oninput="onTextAreaInput()"></textarea>
-                            </div>
-                            <div id="writerBox">
-                                <p>Current writers:</p>
-                                <p id="writerText"></p>
-                            </div>
+                        <div id="writerBox">
+                            <p>Current writers:</p>
+                            <p id="writerText"></p>
+                        </div>
+                    </div>
+                    <div id="chatBox">
+                        <div id="messages"></div>
+                        <div id="sendMessage">
+                            <div id="button_sendMessage" onclick="sendMessage()"><p>Send</p></div>
+                            <textarea id="textArea_message" rows="1" oninput="onTextAreaInput()"></textarea>
                         </div>
                     </div>
                 </div>

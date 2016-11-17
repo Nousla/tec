@@ -33,7 +33,7 @@ app.get('/', function (req, res) {
 wss.on('connection', function connection(ws) {
     url.parse(ws.upgradeReq.url, true);
     console.log("connected with client");
-	
+
     ws.on('open', function () {
         writers.set(ws, 'idle');
     });
@@ -109,51 +109,51 @@ function sendMsg(ws, args) {
             }
         }
     }
-	
-	// Setup data to send
-	var scannedMessage = scanMessage(args);
-	
-	var data = [];
-	// Nickname
-	data.push(ws.name);
-	// Emote count
-	data.push(scannedMessage.emotes.length / 2);
-	// Emotes
-	data.push(scannedMessage.emotes.join(" "));
-	// Message
+
+    // Setup data to send
+    var scannedMessage = scanMessage(args);
+
+    var data = [];
+    // Nickname
+    data.push(ws.name);
+    // Emote count
+    data.push(scannedMessage.emotes.length / 2);
+    // Emotes
+    data.push(scannedMessage.emotes.join(" "));
+    // Message
     data.push(scannedMessage.msg.join(" "));
-	
-	var sendMsg = data.join(" ");
-	
+
+    var sendMsg = data.join(" ");
+
     sendAllRoom(ws.roomID, 'msg_received', sendMsg);
     console.log("Sending message: | " + sendMsg + " | by " + ws.name + " to room " + ws.roomID);
 }
 
-function scanMessage(msg_args){
-	var fullMsg = msg_args.join(" ");
-	fullMsg = fullMsg.replace(/(\r\n|\n|\r)/,"");
-	msg_args = fullMsg.split(" ");
+function scanMessage(msg_args) {
+    var fullMsg = msg_args.join(" ");
+    fullMsg = fullMsg.replace(/(\r\n|\n|\r)/, "");
+    msg_args = fullMsg.split(" ");
 
-	console.log(fullMsg.split(" "));
-	// TODO: censorship
-	
-	var emoteSet = new Set();
-	var foundEmotes = [];
-	for(var i = 0; i < msg_args.length; i++){
-		var msg = msg_args[i];
-		if(emotes.has(msg) && !emoteSet.has(msg)){
-			emoteSet.add(msg);
-			foundEmotes.push(msg);
-			foundEmotes.push(emotes.get(msg));
-		}
-	}
-	
-	var result = {
-		msg: msg_args,
-		emotes: foundEmotes
-	};
-	
-	return result;
+    console.log(fullMsg.split(" "));
+    // TODO: censorship
+
+    var emoteSet = new Set();
+    var foundEmotes = [];
+    for (var i = 0; i < msg_args.length; i++) {
+        var msg = msg_args[i];
+        if (emotes.has(msg) && !emoteSet.has(msg)) {
+            emoteSet.add(msg);
+            foundEmotes.push(msg);
+            foundEmotes.push(emotes.get(msg));
+        }
+    }
+
+    var result = {
+        msg: msg_args,
+        emotes: foundEmotes
+    };
+
+    return result;
 }
 
 function reqChatroom(ws, args) {
@@ -161,15 +161,37 @@ function reqChatroom(ws, args) {
     var roomID = args[0];
     if (activeChatrooms.has(roomID)) {
         console.log('found room ' + roomID);
-		// Disconnect from existing chat room if already set
-		var clients = activeChatrooms.get(roomID);
-		clients.set(ws,true);
-		ws.roomID = roomID;
+        // Disconnect from existing chat room if already set
+        var clients = activeChatrooms.get(roomID);
+        clients.set(ws, true);
+        ws.roomID = roomID;
         send(ws, 'setRoom', roomID);
+
+        updateUserList(roomID);
+
     } else {
         console.log('no chatroom found with the specified ID');
     }
 
+}
+
+function updateUserList(roomID) {
+    var clients = activeChatrooms.get(roomID);
+    var clientList = [];
+    clients.forEach(function search(value, client) {
+        clientList.push(client.name);
+    });
+    
+    clients.forEach(function each(value, client) {
+        send(client, 'updateUserList', clientList);
+    });
+}
+
+function removeFromUserList(roomID, name) {
+    var clients = activeChatrooms.get(roomID);
+    clients.forEach(function each(value, client) {
+        send(client, 'removeFromUserList', name);
+    });
 }
 
 function muteClient(ws, args) {
@@ -216,12 +238,12 @@ function send(ws, code, args) {
 }
 
 function sendAllRoom(roomID, code, args) {
-	if(activeChatrooms.has(roomID)){
-		var clients = activeChatrooms.get(roomID);
-		clients.forEach(function each(value, client) {
-			send(client, code, args);
-		});
-	}
+    if (activeChatrooms.has(roomID)) {
+        var clients = activeChatrooms.get(roomID);
+        clients.forEach(function each(value, client) {
+            send(client, code, args);
+        });
+    }
 }
 
 function sendAll(code, args) {
@@ -231,7 +253,7 @@ function sendAll(code, args) {
     });
 }
 
-function setRole(name, role) {
+function setRole(ws, role) {
     switch (role) {
         case 'admin':
             ws.role = 'admin';
@@ -319,18 +341,19 @@ function createChatroom(ws, args) {
 
     } while (activeChatrooms.has(roomID));
 
-	var clients = new Map();
-	clients.set(ws,true);
-    activeChatrooms.set(roomID,clients);
-	
+    var clients = new Map();
+    clients.set(ws, true);
+    activeChatrooms.set(roomID, clients);
+
     console.log('chatroom created: ' + roomID);
 
     // TODO: Check if the user is actually set as Admin
-	ws.role = 'admin';
-	ws.roomID = roomID;
+    ws.role = 'admin';
+    ws.roomID = roomID;
     // userList.set(roomID, 'ClientID', roomCreator, 'admin');
 
     send(ws, 'setRoom', roomID);
+    updateUserList(roomID);
 }
 
 // [min,max[
