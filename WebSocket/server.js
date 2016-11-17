@@ -184,7 +184,8 @@ function reqChatroom(ws, args) {
 }
 
 function leaveChatroom(ws) {
-	if(ws.roomID === 'undefined' || ws.roomID === null){
+	if(ws.roomID === 'undefined' || ws.roomID === null 
+		|| !activeChatrooms.has(ws.roomID)){
 		return;
 	}
 	
