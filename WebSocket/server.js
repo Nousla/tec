@@ -112,8 +112,10 @@ function sendMsg(ws, args) {
                 }
             }
         }
-    } else if (ws.role === 'admin' || ws.role === 'moderator') {
+    }
+    if (ws.role === 'admin' || ws.role === 'moderator') {
         if (args[0] === '/mute') {
+            var otherWS = names.get(args[1]);
             sendMessage = false;
             muteClient(otherWS);
             sendAllRoom(ws.roomID, 'notification_received', ws.name + ' has muted ' + args[1]);
