@@ -84,7 +84,7 @@ function sendMsg(ws, args) {
         return;
     }
     var sendMessage = true;
-    if (ws.role === 'admin' || ws.role === 'moderator') {
+    if (ws.role === 'admin') {
         var otherWS = names.get(args[1]);
         if (otherWS !== undefined && otherWS !== null) {
             if (args[0] === '/mod') {
@@ -110,15 +110,17 @@ function sendMsg(ws, args) {
                         }
                     }
                 }
-            } else if (args[0] === '/mute') {
-                sendMessage = false;
-                muteClient(otherWS);
-                sendAllRoom(ws.roomID, 'notification_received', ws.name + ' has muted ' + args[1]);
-            } else if (args[0] === '/unmute') {
-                sendMessage = false;
-                unmuteClient(otherWS);
-                sendAllRoom(ws.roomID, 'notification_received', ws.name + ' has unmuted ' + args[1]);
             }
+        }
+    } else if (ws.role === 'admin' || ws.role === 'moderator') {
+        if (args[0] === '/mute') {
+            sendMessage = false;
+            muteClient(otherWS);
+            sendAllRoom(ws.roomID, 'notification_received', ws.name + ' has muted ' + args[1]);
+        } else if (args[0] === '/unmute') {
+            sendMessage = false;
+            unmuteClient(otherWS);
+            sendAllRoom(ws.roomID, 'notification_received', ws.name + ' has unmuted ' + args[1]);
         }
     }
     if (sendMessage === false) {
@@ -310,6 +312,7 @@ function setRole(ws, role) {
 
         case 'spectator':
             ws.role = 'spectator';
+            muteClient(ws);
             break;
     }
 }
