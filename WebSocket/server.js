@@ -50,18 +50,16 @@ wss.on('connection', function connection(ws) {
     });
 
     ws.on('close', function () {
-        leaveChatroom(ws);
-
         if (ws.name !== undefined && names.has(ws.name)) {
             names.delete(ws.name);
         }
-
-        writers.delete(ws);
+		
+		leaveChatroom(ws);
     });
 });
 
 http.on('request', app);
-http.listen(3000, function () {
+http.listen(port, function () {
     console.log('Listening on ' + port);
 });
 
@@ -75,12 +73,16 @@ function parseMessage(msg) {
         code: msgs[0],
         args: msgs.slice(1, msgs.length)
     };
+	
+	if(cmd.args.length === 1 && cmd.args[0] === ''){
+		cmd.args = [];
+	}
 
     return cmd;
 }
 
 function sendMsg(ws, args) {
-    if (ws.muted === true) {
+    if (ws.muted === true || args.length == 0) {
         return;
     }
     var sendMessage = true;
@@ -184,6 +186,7 @@ function reqChatroom(ws, args) {
         clients.set(ws, true);
         ws.roomID = roomID;
         ws.muted = false;
+		setRole(ws, 'chatter');
         send(ws, 'setRoom', roomID);
 
         updateUserList(roomID);
@@ -204,8 +207,13 @@ function leaveChatroom(ws) {
     if (clients.has(ws)) {
         clients.delete(ws);
     }
-
     ws.roomID = null;
+	
+	var currentState = writers.get(ws);
+	if (currentState === 'writing') {
+		sendAllRoom(roomID, 'writer_change', ws.name + " " + 'idle');
+	}
+	writers.delete(ws);
 
     if (clients.size == 0) {
         activeChatrooms.delete(roomID);
@@ -236,10 +244,18 @@ function removeFromUserList(roomID, name) {
 
 function muteClient(ws) {
     ws.muted = true;
+	
+	if(ws.role === 'chatter'){
+		ws.role = 'spectator'
+	}
 }
 
 function unmuteClient(ws) {
     ws.muted = false;
+	
+	if(ws.role === 'spectator'){
+		ws.role = 'chatter'
+	}
 }
 
 function setName(ws, args) {
@@ -308,8 +324,9 @@ function setRole(ws, role) {
             ws.role = 'moderator';
             break;
 
-        case 'user':
-            ws.role = 'user';
+        case 'chatter':
+            ws.role = 'chatter';
+			unmuteClient(ws);
             break;
 
         case 'spectator':

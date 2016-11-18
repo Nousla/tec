@@ -216,7 +216,6 @@
                 showRoomSelect();
             }
 
-            //TODO: test if it works
             function enterChatroom() {
                 var textInput = document.getElementById('textInput_chatroom');
                 joinChatRoom(textInput.value);
@@ -313,14 +312,7 @@
                 if (name == undefined) {
                     return;
                 }
-                /*
-                 if(state == 'idle' && writers.has(name)){
-                 writers.delete(name);
-                 }
-                 else{
-                 writers.set(name,state);
-                 }*/
-
+				
                 writers.set(name, state);
 
                 updateWriters();
@@ -371,10 +363,12 @@
 
             function sendMessage() {
                 var textarea = document.getElementById("textArea_message");
-                send(ws, 'msg_send', textarea.value);
-                console.log(textarea.value);
-                textarea.value = "";
-                textarea.rows = 1;
+				if(textarea.value !== ''){
+					send(ws, 'msg_send', textarea.value);
+					console.log(textarea.value);
+					textarea.value = "";
+					textarea.rows = 1;
+				}
             }
 
             function autoResize() {
