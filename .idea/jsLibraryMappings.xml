@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavaScriptLibraryMappings">
+    <file url="file://$PROJECT_DIR$/Niels 3assignment/Jquary" libraries="{tec/Niels 3assignment/Jquary/node_modules}" />
+    <file url="file://$PROJECT_DIR$/Niels 3assignment/Serverless" libraries="{tec/Niels 3assignment/Serverless/node_modules}" />
     <file url="file://$PROJECT_DIR$/WebSocket" libraries="{tec/WebSocket/node_modules}" />
   </component>
 </project>

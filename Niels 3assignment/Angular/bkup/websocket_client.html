@@ -1,5 +1,5 @@
 <!doctype html>
-<html >
+<html>
     <head>
         <title>JavaScript + WebSocket + Node.js Chat</title>
         <link rel="stylesheet" type="text/css" href="stylesheet.css">
@@ -7,15 +7,17 @@
     <body>
         <script>
             var userName;
+            var roomID;
+
             var commands = new Map();
             commands.set('msg_received', receivedMessage);
             commands.set('name_changed', changedName);
             commands.set('writer_change', changedWriter);
             commands.set('setRoom', setRoom);
 
-            var currentRoom = 'Lobby'
             var writers = new Map();
 
+            ///// Connect to server, and send/recieve messages
             ws = new WebSocket("ws://localhost:3000");
 
             ws.onopen = function () {
@@ -94,10 +96,100 @@
 
             }
 
+
+
+            ///// User/room selection code
+            function createUser() {
+                var textInput = document.getElementById('textInput_nickname');
+                userName = textInput.value;
+                send(ws, 'name_set', textInput.value);
+            }
+
+            function setRoom(args) {
+                roomID = args;
+                showChatroom();
+            }
+
+            // Blur/focus user/room 
+            function nicknameOnFocus() {
+                var textInput = document.getElementById('textInput_nickname');
+                if (textInput.value == 'Enter your nickname') {
+                    textInput.value = '';
+                }
+            }
+            function nicknameOnBlur() {
+                var textInput = document.getElementById('textInput_nickname');
+                if (textInput.value == '') {
+                    textInput.value = 'Enter your nickname';
+                }
+            }
+
+            function chatroomOnFocus() {
+                var textInput = document.getElementById('textInput_chatroom');
+                if (textInput.value == 'Enter Chatroom') {
+                    textInput.value = '';
+                }
+            }
+            function chatroomOnBlur() {
+                var textInput = document.getElementById('textInput_chatroom');
+                if (textInput.value == '') {
+                    textInput.value = 'Enter Chatroom';
+                }
+            }
+
+            // Show chatroom selection
             function changedName(msg) {
                 showRoomSelect();
             }
 
+            //TODO: test if it works
+            function enterChatroom() {
+                var textInput = document.getElementById('textInput_chatroom');
+                joinChatRoom(textInput.value);
+            }
+
+            function joinChatRoom(id) {
+                send(ws, 'chatroom_req', id);
+                console.log('asking server for chatroom ID');
+            }
+
+            // Create chatroom
+            function createChatroom() {
+                send(ws, 'createChatroom', userName);
+            }
+
+
+            ///// Change between Div elements
+            function showDiv(id) {
+                switch (id) {
+                    case 'userSelect':
+                        document.getElementById("userSelect").style.display = "block";
+                        document.getElementById("roomSelect").style.display = "none";
+                        break;
+
+                    case 'roomSelect':
+                        document.getElementById("userSelect").style.display = "none";
+                        document.getElementById("roomSelect").style.display = "block";
+                        break;
+
+                    case 'chatroom':
+                        document.getElementById("selectionContainer").style.display = "none";
+                        document.getElementById("chatroomContainer").style.display = "block";
+                        break;
+                }
+            }
+            function showUserSelect() {
+                showDiv('userSelect');
+            }
+            function showRoomSelect() {
+                showDiv('roomSelect');
+            }
+            function showChatroom() {
+                showDiv('chatroom');
+            }
+            
+
+            ///// chatroom code
             function changedWriter(args) {
                 var name = args[0];
                 var state = args[1];
@@ -137,80 +229,6 @@
                 console.log(writerText);
             }
 
-            function nicknameOnFocus() {
-                var textInput = document.getElementById('textInput_nickname');
-                if (textInput.value == 'Enter your nickname') {
-                    textInput.value = '';
-                }
-            }
-
-            function joinChatRoom(id) {
-                send(ws, 'chatroom_req', id);
-                console.log('asking server for chatroom ID');
-            }
-            function setRoom(id) {
-                currentRoom = id;
-
-            }
-            function muteClient() {
-                send(ws, 'mute_Client', id);
-            }
-
-            function nicknameOnBlur() {
-                var textInput = document.getElementById('textInput_nickname');
-                if (textInput.value == '') {
-                    textInput.value = 'Enter your nickname';
-                }
-            }
-
-            function createUser() {
-                var textInput = document.getElementById('textInput_nickname');
-                userName = textInput.value;
-                send(ws, 'name_set', textInput.value);
-            }
-
-            function showRoomSelect() {
-                document.getElementById("userSelect").style.display = "none";
-                document.getElementById("roomSelect").style.display = "block";
-            }
-
-            function chatroomOnFocus() {
-                var textInput = document.getElementById('textInput_chatroom');
-                if (textInput.value == 'Enter Chatroom') {
-                    textInput.value = '';
-                }
-            }
-            function enterChatroom() {
-                var textInput = document.getElementById('textInput_chatroom');
-                joinChatRoom(textInput.value);
-            }
-
-            function chatroomOnBlur() {
-                var textInput = document.getElementById('textInput_chatroom');
-                if (textInput.value == '') {
-                    textInput.value = 'Enter Chatroom';
-                }
-            }
-
-            function showUserSelect() {
-                document.getElementById("userSelect").style.display = "block";
-                document.getElementById("roomSelect").style.display = "none";
-            }
-
-            function createChat() {
-                // temp solution for random ID for room creation. 
-                // Should use a list instead, so a room with the same ID can't be created
-                var roomID = Math.floor(Math.random() * (1000 - 1 + 1)) + 1;
-                send(ws, 'create', roomID);
-                document.getElementById("roomKey").innerHTML = roomID;
-            }
-
-            function sendMessage() {
-                var textarea = document.getElementById("textArea_message");
-                send(ws, 'msg_send', Lobby + " " + textarea.value);
-                textarea.value = "";
-            }
-
             var writerTimeOutID;
             var writerTimeOutDone = true;
             var writerTimeOutTime = 1500;
@@ -236,12 +254,19 @@
                 send(ws, 'ping_writer', 'idle');
             }
 
+            function sendMessage() {
+                var textarea = document.getElementById("textArea_message");
+                send(ws, 'msg_send', Lobby + " " + textarea.value);
+                textarea.value = "";
+            }
+
             function autoResize() {
                 var textarea = document.getElementById("textArea_message");
                 if (textarea.clientHeight < textarea.scrollHeight) {
                     textarea.rows++;
                 }
             }
+
 
         </script>
         <div id="wrap">
@@ -250,12 +275,16 @@
                     <p id="logo">JavaScript + WebSocket + Node.js Chat</p>
                 </div>
 
-                <div class="selectionBox" style="display: block;">
+                <div class="selectionContainer" style="display: block;">
+                    
+                    <!-- User selction -->
                     <div id="userSelect" style="display: block;">
                         <h1>Who are you?</h1>
                         <div id="button_createUser" onclick="createUser()"><p>Enter</p></div>
                         <input type="text" id="textInput_nickname" value="Enter your nickname" onfocus="nicknameOnFocus()" onblur="nicknameOnBlur()">
                     </div>
+                    
+                    <!-- Chatroom selction -->
                     <div id="roomSelect" style="display: none;">
                         <div id="enterChatroom">
                             <h1>Enter Chatroom</h1>
@@ -265,38 +294,34 @@
                         <p id="roomSelectOr">OR</p>
                         <div id="createChatroom">
                             <h1>Create Chatroom</h1>
-                            <div id="button_createChatroom" onclick="createChat()"><p>+</p></div>
-                        </div>
-                        <div id="muteClient">
-                            <h1>muteClient</h1>
-                            <div id="button_muteClient" onclick="muteClient()"><p>+</p></div>
+                            <div id="button_createChatroom" onclick="createChatroom()"><p>+</p></div>
                         </div>
                     </div>
-                    <div id="container" style="display: none;">
-                        <div class="content">
-                            <div>
-                                <div id="featureBox">
-                                    <div id="userListBox">
-                                        userlist
-                                    </div>
-                                    <div id="adminPriviliges">
-                                        <div class="buttonTest"><p>Make client a moderator</p></div>
-                                        <div class="buttonTest"><p>Mute/unmute client</p></div>
-                                        <div class="buttonTest"><p>Kick client</p></div>
-                                        <div class="buttonTest"><p>Ban client</p></div>
-                                    </div>
-                                </div>
-                                <div id="chatBox">
-                                    <div id="messages"></div>
-                                    <div id="sendMessage">
-                                        <div id="button_sendMessage" onclick="sendMessage()"><p>Send</p></div>
-                                        <textarea id="textArea_message" rows="1" oninput="onTextAreaInput()"></textarea>
-                                    </div>
-                                    <div id="writerBox">
-                                        <p>Current writers:</p>
-                                        <p id="writerText"></p>
-                                    </div>
-                                </div>
+                </div>
+                
+                <!-- Chatroom Div -->
+                <div id="chatroomContainer" style="display: none;">
+                    <div>
+                        <div id="featureBox">
+                            <div id="userListBox">
+                                userlist
+                            </div>
+                            <div id="adminPriviliges">
+                                <div class="buttonTest"><p>Make client a moderator</p></div>
+                                <div class="buttonTest"><p>Mute/unmute client</p></div>
+                                <div class="buttonTest"><p>Kick client</p></div>
+                                <div class="buttonTest"><p>Ban client</p></div>
+                            </div>
+                        </div>
+                        <div id="chatBox">
+                            <div id="messages"></div>
+                            <div id="sendMessage">
+                                <div id="button_sendMessage" onclick="sendMessage()"><p>Send</p></div>
+                                <textarea id="textArea_message" rows="1" oninput="onTextAreaInput()"></textarea>
+                            </div>
+                            <div id="writerBox">
+                                <p>Current writers:</p>
+                                <p id="writerText"></p>
                             </div>
                         </div>
                     </div>

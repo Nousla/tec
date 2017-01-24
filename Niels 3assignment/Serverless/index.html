@@ -1,0 +1,437 @@
+<!doctype html>
+<html>
+    <head>
+        <title>JavaScript + WebSocket + Node.js Chat</title>
+        <link rel="stylesheet" type="text/css" href="resources/stylesheet.css">
+    </head>
+    <body>
+        <script>
+            var userName;
+            var roomID;
+            var userList = [];
+            var defaultRoomID = "Javascript chat";
+
+            var commands = new Map();
+            commands.set('msg_received', receivedMessage);
+            commands.set('notification_received', receivedNotification);
+            commands.set('name_changed', changedName);
+            commands.set('writer_change', changedWriter);
+            commands.set('setRoom', setRoom);
+            commands.set('updateUserList', updateUserList);
+            commands.set('removeFromUserList', removeFromUserList);
+
+            var writers = new Map();
+
+            ///// Connect to server, and send/receive messages
+            ws = new WebSocket("ws://localhost:3000");
+
+            ws.onopen = function () {
+                console.log("connected to server");
+            };
+
+            ws.onmessage = function (event) {
+                var cmd = parseMessage(event.data);
+                if (cmd == undefined) {
+                    return;
+                }
+
+                if (commands.has(cmd.code)) {
+                    commands.get(cmd.code)(cmd.args);
+                }
+            };
+
+            ws.onclose = function () {
+                console.log("disconnected from server");
+            };
+
+            function parseMessage(msg) {
+                console.log(msg);
+                console.log("Message received parse: " + msg);
+                if (msg.length == 0) {
+                    return;
+                }
+
+                var msgs = msg.split(" ");
+                var cmd = {
+                    code: msgs[0],
+                    args: msgs.slice(1, msgs.length)
+                }
+
+                return cmd;
+            }
+            /*
+             window.onload = function () {
+             document.getElementById("sendForm").onsubmit = function () {
+             var sendInput = document.getElementById("sendInput");
+             send(ws, 'msg_send', currentRoom + ' ' + userName + ' ' + sendInput.value);
+             sendInput.value = "";
+             return false;
+             };
+             }
+             */
+
+            function send(ws, code, args) {
+                ws.send(code + " " + args);
+                console.log("Sending" + " " + code + " " + args);
+            }
+
+            function receivedMessage(args) {
+                var nickname = args[0];
+                var emoteCount = parseInt(args[1]);
+                var emoteEndIndex;
+                var emotes = new Map();
+                if (emoteCount > 0) {
+                    var emoteStartIndex = 2;
+                    emoteEndIndex = 2 + (emoteCount * 2);
+                    for (var i = 0; i < emoteCount; i++) {
+                        emotes.set(args[emoteStartIndex + 2 * i], args[emoteStartIndex + (2 * i) + 1]);
+                    }
+                } else {
+                    emoteEndIndex = 3;
+                }
+                var msgFragments = args.slice(emoteEndIndex, args.length);
+
+                var message = document.createElement("div");
+                message.className = "message";
+
+                var nicknameParagraph = document.createElement("p");
+                var nicknameText = document.createTextNode(nickname);
+                nicknameParagraph.appendChild(nicknameText);
+                nicknameParagraph.id = "nickname";
+                message.appendChild(nicknameParagraph);
+
+                var msgFragment = [];
+                var emoteFound = false;
+                for (var i = 0; i < msgFragments.length; i++) {
+                    if (emotes.has(msgFragments[i])) {
+                        if (msgFragment.length > 0) {
+                            var msg = msgFragment.join(" ");
+                            var msgParagraph = document.createElement("p");
+                            var msgText = document.createTextNode(msg);
+                            msgParagraph.appendChild(msgText);
+                            message.appendChild(msgParagraph);
+
+                            msgFragment = [];
+                        }
+
+                        var emoteImg = document.createElement("img");
+                        emoteImg.src = emotes.get(msgFragments[i]);
+                        emoteImg.className = "emote";
+                        message.appendChild(emoteImg);
+                    } else {
+                        msgFragment.push(msgFragments[i]);
+
+                        if (i == msgFragments.length - 1 && msgFragment.length > 0) {
+                            var msg = msgFragment.join(" ");
+                            var msgParagraph = document.createElement("p");
+                            var msgText = document.createTextNode(msg);
+                            msgParagraph.appendChild(msgText);
+                            message.appendChild(msgParagraph);
+                        }
+                    }
+                }
+
+                document.getElementById("messages").appendChild(message);
+
+                var chatBox = document.getElementById("messages");
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                var textarea = document.getElementById("textArea_message");
+                textarea.value = '';
+                textarea.rows = 1;
+            }
+
+            function receivedNotification(args) {
+                var notification = document.createElement("div");
+                notification.className = "notification";
+                var notificationParagraph = document.createElement("p");
+                var notificationText = document.createTextNode(args.join(" "));
+                notificationParagraph.appendChild(notificationText);
+                notification.appendChild(notificationParagraph);
+                document.getElementById("messages").appendChild(notification);
+
+                var chatBox = document.getElementById("messages");
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                var textarea = document.getElementById("textArea_message");
+                textarea.value = '';
+                textarea.rows = 1;
+            }
+
+            ///// User/room selection code
+            function createUser() {
+                var textInput = document.getElementById('textInput_nickname');
+                userName = textInput.value;
+                send(ws, 'name_set', textInput.value);
+            }
+
+            function setRoom(args) {
+                roomID = args;
+                console.log(roomID);
+                if (roomID[0] !== 'Lobby') {
+                    showChatroom();
+                    document.getElementById('logoSelection').setAttribute("id", "logoChatroom");
+                    document.getElementById('logo').innerHTML = "Chatroom: " + args;
+                } else {
+                    console.log("changed room to lobby");
+                    showRoomSelect();
+                    document.getElementById('logoChatroom').setAttribute("id", "logoSelection");
+                    document.getElementById('logo').innerHTML = defaultRoomID;
+                    var messages = document.getElementById('messages');
+                    while (messages.hasChildNodes()) {
+                        messages.removeChild(messages.lastChild);
+                    }
+                }
+            }
+
+            // Blur/focus user/room 
+            function nicknameOnFocus() {
+                var textInput = document.getElementById('textInput_nickname');
+                if (textInput.value == 'Enter your nickname') {
+                    textInput.value = '';
+                }
+            }
+            function nicknameOnBlur() {
+                var textInput = document.getElementById('textInput_nickname');
+                if (textInput.value == '') {
+                    textInput.value = 'Enter your nickname';
+                }
+            }
+
+            function chatroomOnFocus() {
+                var textInput = document.getElementById('textInput_chatroom');
+                if (textInput.value == 'Enter Chatroom') {
+                    textInput.value = '';
+                }
+            }
+            function chatroomOnBlur() {
+                var textInput = document.getElementById('textInput_chatroom');
+                if (textInput.value == '') {
+                    textInput.value = 'Enter Chatroom';
+                }
+            }
+
+            // Show chatroom selection
+            function changedName(msg) {
+                showRoomSelect();
+            }
+
+            function enterChatroom() {
+                var textInput = document.getElementById('textInput_chatroom');
+                joinChatRoom(textInput.value);
+            }
+
+            function joinChatRoom(id) {
+                send(ws, 'chatroom_req', id);
+                console.log('asking server for chatroom ID');
+            }
+
+            // Create chatroom
+            function createChatroom() {
+                send(ws, 'createChatroom', userName);
+            }
+
+
+            ///// Change between Div elements
+            function showDiv(id) {
+                switch (id) {
+                    case 'userSelect':
+                        document.getElementById("userSelect").style.display = "block";
+                        document.getElementById("roomSelect").style.display = "none";
+                        document.getElementById("selectionContainer").style.display = "block";
+                        document.getElementById("chatroomContainer").style.display = "none";
+                        break;
+
+                    case 'roomSelect':
+                        document.getElementById("userSelect").style.display = "none";
+                        document.getElementById("roomSelect").style.display = "block";
+                        document.getElementById("selectionContainer").style.display = "block";
+                        document.getElementById("chatroomContainer").style.display = "none";
+                        break;
+
+                    case 'chatroom':
+                        document.getElementById("selectionContainer").style.display = "none";
+                        document.getElementById("chatroomContainer").style.display = "block";
+                        break;
+                }
+            }
+            function showUserSelect() {
+                showDiv('userSelect');
+            }
+            function showRoomSelect() {
+                showDiv('roomSelect');
+            }
+            function showChatroom() {
+                showDiv('chatroom');
+            }
+
+
+            ///// chatroom code
+            function updateUserList(args) {
+                var clientList = args;
+                console.log("updateUserList:")
+
+                clientList.forEach(function each(name, index) {
+                    if (userList.indexOf(name) === -1) {
+                        userList.push(name);
+                        var div = document.createElement("div");
+                        var paragraph = document.createElement("p");
+                        var text = document.createTextNode(name);
+
+                        paragraph.appendChild(text);
+                        div.appendChild(paragraph);
+                        div.setAttribute("id", "username" + name);
+                        document.getElementById("userListBox").appendChild(div);
+                    }
+                });
+
+                userList.forEach(function each(name, index) {
+                    if (clientList.indexOf(name) === -1) {
+                        userList.splice(index, 1);
+
+                        var userListBox = document.getElementById("userListBox");
+                        var userDiv = document.getElementById("username" + name);
+                        userListBox.removeChild(userDiv);
+                    }
+                });
+            }
+
+            function removeFromUserList(args) {
+                //userList.splice(args);
+                var index = userList.indexOf(args);
+                userList.splice(index, 1);
+
+                var userListBox = document.getElementById("userListBox");
+                userListBox.removeChild("username" + args);
+            }
+
+            function changedWriter(args) {
+                var name = args[0];
+                var state = args[1];
+
+                if (name == undefined) {
+                    return;
+                }
+				
+                writers.set(name, state);
+
+                updateWriters();
+            }
+
+            function updateWriters() {
+                var text = [];
+                if (writers.size > 5) {
+                    text.push(writer.size + " people are writing...");
+                } else {
+                    writers.forEach(function (value, key, map) {
+                        if (value == 'writing') {
+                            text.push(key);
+                        }
+                    });
+                }
+
+                var writerText = document.getElementById('writerText');
+                writerText.innerHTML = text.join(', ');
+                console.log(writerText);
+            }
+
+            var writerTimeOutID;
+            var writerTimeOutDone = true;
+            var writerTimeOutTime = 1500;
+
+            function onTextAreaInput() {
+                if (!writerTimeOutDone) {
+                    clearTimeout(writerTimeOutID);
+                } else {
+                    send(ws, 'ping_writer', 'writing');
+                }
+
+                writerTimeOutID = setTimeout(function () {
+                    onWriterTimeOut();
+                }, writerTimeOutTime);
+
+                writerTimeOutDone = false;
+
+                autoResize();
+            }
+
+            function onWriterTimeOut() {
+                writerTimeOutDone = true;
+
+                send(ws, 'ping_writer', 'idle');
+            }
+
+            function sendMessage() {
+                var textarea = document.getElementById("textArea_message");
+				if(textarea.value !== ''){
+					send(ws, 'msg_send', textarea.value);
+					console.log(textarea.value);
+					textarea.value = "";
+					textarea.rows = 1;
+				}
+            }
+
+            function autoResize() {
+                var textarea = document.getElementById("textArea_message");
+                if (textarea.clientHeight < textarea.scrollHeight) {
+                    textarea.rows++;
+                }
+            }
+
+
+        </script>
+        <div id="wrap">
+            <div id="logoSelection">
+                <div class="content">
+                    <p id="logo">JavaScript Chat</p>
+                </div>
+            </div>
+
+            <div id="selectionContainer" style="display: block;">
+                <div id="selectionBox">
+                    <!-- User selction -->
+                    <div id="userSelect" style="display: block;">
+                        <h1>Who are you?</h1>
+                        <div id="button_createUser" onclick="createUser()"><p>Enter</p></div>
+                        <input type="text" id="textInput_nickname" value="Enter your nickname" onfocus="nicknameOnFocus()" onblur="nicknameOnBlur()">
+                    </div>
+
+                    <!-- Chatroom selction -->
+                    <div id="roomSelect" style="display: none;">
+                        <div id="enterChatroom">
+                            <h1>Enter Chatroom</h1>
+                            <div id="button_enterChatroom" onclick="enterChatroom()"><p>Enter</p></div>
+                            <input type="text" id="textInput_chatroom" value="Enter Chatroom" onfocus="chatroomOnFocus()" onblur="chatroomOnBlur()">
+                        </div>
+                        <p id="roomSelectOr">OR</p>
+                        <div id="createChatroom">
+                            <h1>Create Chatroom</h1>
+                            <div id="button_createChatroom" onclick="createChatroom()"><p>+</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chatroom Div -->
+            <div id="chatroomContainer" style="display: none;">
+                <div>
+                    <div id="featureBox">
+                        <div id="userListBox">
+                        </div>
+                        <div id="writerBox">
+                            <p>Current writers:</p>
+                            <p id="writerText"></p>
+                        </div>
+                    </div>
+                    <div id="chatBox">
+                        <div id="messages"></div>
+                        <div id="sendMessage">
+                            <div id="button_sendMessage" onclick="sendMessage()"><p>Send</p></div>
+                            <textarea id="textArea_message" rows="1" oninput="onTextAreaInput()"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
